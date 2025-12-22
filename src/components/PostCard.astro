@@ -1,0 +1,61 @@
+---
+import PostMeta from './PostMeta.astro';
+import TagList from './TagList.astro';
+
+interface Props {
+  title: string;
+  slug: string;
+  date: Date;
+  summary: string;
+  tags: string[];
+  readingText: string;
+  variant?: 'default' | 'compact' | 'featured';
+}
+
+const { title, slug, date, summary, tags, readingText, variant = 'default' } = Astro.props;
+
+// Variant-specific styling
+const variants = {
+  default: {
+    container: 'group',
+    titleSize: 'text-2xl',
+    showReadMore: true
+  },
+  compact: {
+    container: 'group',
+    titleSize: 'text-2xl',
+    showReadMore: false
+  },
+  featured: {
+    container: 'group border-l-4 border-brand-600 dark:border-brand-400 pl-4',
+    titleSize: 'text-3xl',
+    showReadMore: true
+  }
+};
+
+const config = variants[variant];
+---
+
+<article data-testid="post-card" class={config.container}>
+  <a data-testid="post-card-link" href={`/blog/${slug}`} class="block">
+    <PostMeta date={date} readingText={readingText} dateFormat="short" />
+
+    <h3 data-testid="post-card-title" class={`${config.titleSize} font-sans font-bold text-gray-900 dark:text-gray-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors mb-2 mt-1`}>
+      {title}
+    </h3>
+
+    <div data-testid="post-card-summary" class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400 leading-relaxed">
+      {summary}
+    </div>
+  </a>
+
+  <div class="mt-4">
+    <TagList tags={tags} />
+  </div>
+
+  {config.showReadMore && (
+    <a data-testid="post-card-read-more" href={`/blog/${slug}`} class="inline-block mt-2 text-sm font-sans font-medium text-brand-600 dark:text-brand-400 underline decoration-transparent hover:decoration-current transition-all">
+      Leer artículo →
+    </a>
+  )}
+</article>

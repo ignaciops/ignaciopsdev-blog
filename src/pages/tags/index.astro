@@ -1,0 +1,41 @@
+
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = await getCollection('posts');
+
+const tagCounts: { [tag: string]: number } = {};
+posts.forEach(post => {
+  if (post.data.tags) {
+    post.data.tags.forEach(tag => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
+  }
+});
+
+const sortedTags = Object.entries(tagCounts).sort(([, a], [, b]) => b - a);
+
+const maxCount = Math.max(...Object.values(tagCounts));
+const minCount = Math.min(...Object.values(tagCounts));
+
+function getFontSize(count: number): string {
+    if (maxCount === minCount) return '1rem';
+    const size = 1 + (count - minCount) / (maxCount - minCount) * 1.5; // Scale between 1rem and 2.5rem
+    return `${size}rem`;
+}
+---
+
+<BaseLayout title="Tags">
+    <div class="container mx-auto px-4 py-8">
+        <h1 data-testid="tags-page-title" class="text-4xl font-bold mb-8 text-center">Tags</h1>
+        <div data-testid="tags-cloud" class="flex flex-wrap justify-center items-center gap-4">
+            {sortedTags.map(([tag, count]) => (
+                <a href={`/tags/${tag}`} class="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-4 py-2 text-lg font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300"
+                   style={{ fontSize: getFontSize(count) }}>
+                    #{tag} <span class="text-sm">({count})</span>
+                </a>
+            ))}
+        </div>
+    </div>
+</BaseLayout>

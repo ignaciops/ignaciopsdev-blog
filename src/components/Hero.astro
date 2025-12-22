@@ -1,0 +1,61 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Button {
+  text: string;
+  link: string;
+  variant: 'primary' | 'secondary';
+}
+
+interface Props {
+  title?: string;
+  description?: string;
+  buttons?: Button[];
+  backgroundImage?: ImageMetadata | null;
+}
+
+const { title, description, buttons, backgroundImage } = Astro.props;
+---
+
+<section data-testid="hero-section" class="relative w-full overflow-hidden -mt-[88px]" style="min-height: calc(60vh + 88px);">
+  {backgroundImage && (
+    <div class="absolute inset-0 z-0">
+      <Image
+        data-testid="hero-background-image"
+        src={backgroundImage}
+        alt="Background Image"
+        class="object-cover w-full h-full"
+        quality={"high"}
+      />
+      <div class="absolute inset-0 bg-black opacity-60"></div>
+    </div>
+  )}
+  <div class="relative z-10 w-full max-w-5xl mx-auto px-4 pt-32 md:pt-40 pb-16 md:pb-24 min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex flex-col justify-center">
+    {title && (
+        <h1 data-testid="hero-title" class="font-sans font-extrabold text-5xl md:text-6xl lg:text-7xl text-white mb-6 drop-shadow-lg">
+            {title}
+        </h1>
+    )}
+    {description && (
+        <p data-testid="hero-description" class="text-xl md:text-2xl lg:text-3xl text-gray-200 leading-relaxed max-w-3xl mb-8 drop-shadow-md text-center">
+            {description}
+        </p>
+    )}
+    {buttons && (
+      <div data-testid="hero-buttons" class="flex flex-wrap gap-4">
+          {buttons.map(button => (
+              <a data-testid={`hero-button-${button.variant}`} href={button.link} class:list={[
+                  "inline-block px-6 py-3 font-sans font-bold rounded-lg transition-all shadow-lg hover:shadow-xl",
+                  {
+                      'bg-brand-600 hover:bg-brand-700 text-white': button.variant === 'primary',
+                      'bg-white/10 backdrop-blur-sm border-2 border-white/50 text-white hover:bg-white/20 hover:border-white': button.variant === 'secondary'
+                  }
+              ]}>
+                  {button.text}
+              </a>
+          ))}
+      </div>
+    )}
+  </div>
+</section>

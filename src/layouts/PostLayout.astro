@@ -1,0 +1,86 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from './BaseLayout.astro';
+import PostMeta from '../components/PostMeta.astro';
+import TagList from '../components/TagList.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import PostNavigation from '../components/PostNavigation.astro';
+import { siteConfig } from '../config/site';
+
+interface Props {
+  frontmatter: any;
+  headings: any[];
+  body: string;
+  prev?: any;
+  next?: any;
+}
+
+const { frontmatter, headings, body, prev, next } = Astro.props;
+
+const pageTitle = `${frontmatter.title} | ${siteConfig.name}`;
+const description = frontmatter.metaDescription || frontmatter.summary || siteConfig.description;
+const ogImage = frontmatter.ogImage || frontmatter.coverImage || siteConfig.defaultOgImage;
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={description}
+  ogImage={ogImage}
+  ogType="article"
+  publishedTime={frontmatter.date}
+  tags={frontmatter.tags}
+  wideContainer={true}
+>
+    <!-- POST HEADER (Title, Meta, Tags) -->
+    <header data-testid="post-header" class="mb-8 not-prose">
+      <h1 data-testid="post-title" class="font-sans font-extrabold text-4xl md:text-5xl lg:text-6xl mb-4 text-gray-900 dark:text-white">
+        {frontmatter.title}
+      </h1>
+      <div class="mb-6">
+        <PostMeta date={frontmatter.date} readingText={body} dateFormat="long" />
+      </div>
+      {(frontmatter.summary || frontmatter.metaDescription) && (
+        <p class="text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+          {frontmatter.summary || frontmatter.metaDescription}
+        </p>
+      )}
+      <TagList tags={frontmatter.tags} size="md" />
+    </header>
+
+    <!-- COVER IMAGE (if exists) -->
+    {frontmatter.coverImage && (
+      <div class="w-full -mx-4 mb-12">
+        <div class="w-full overflow-hidden">
+          <Image
+            data-testid="post-cover-image"
+            src={frontmatter.coverImage}
+            alt={frontmatter.title}
+            width={1200}
+            height={675}
+            class="w-full h-auto object-cover"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+        {frontmatter.coverImageAttribution && (
+          <div class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800">
+            <p class="text-xs text-gray-600 dark:text-gray-400 text-center" set:html={frontmatter.coverImageAttribution} />
+          </div>
+        )}
+      </div>
+    )}
+
+    <div class="relative lg:grid lg:grid-cols-12 lg:gap-12 items-start">
+        <!-- ARTICLE CONTENT -->
+        <article data-testid="post-content" class="prose dark:prose-invert max-w-none lg:col-span-8">
+
+            <slot />
+        </article>
+
+        <!-- SIDEBAR (TOC) -->
+        <TableOfContents headings={headings} />
+    </div>
+
+    <!-- POST NAVIGATION -->
+    <PostNavigation prev={prev} next={next} />
+</BaseLayout>

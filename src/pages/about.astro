@@ -1,0 +1,20 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const about = await getEntry('about', 'index');
+if (!about) {
+    throw new Error('About page content not found');
+}
+const { Content } = await about.render();
+---
+<BaseLayout title={`Ignacio PS - ${about.data.title}`}>
+    <div class="max-w-3xl mx-auto">
+        <h1 class="font-sans font-bold text-4xl mb-4 text-gray-900 dark:text-white text-center">
+            {about.data.title}
+        </h1>
+        <div class="prose dark:prose-invert max-w-none">
+            <Content />
+        </div>
+    </div>
+</BaseLayout>

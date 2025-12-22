@@ -1,0 +1,340 @@
+---
+title: Guía. Cómo incrementar la seguridad de tu VPS [1/3]
+date: 2025-08-08
+summary: >-
+  En esta serie aprenderás como asegurar el acceso SSH y a configurar tu
+  cortafuegos UFW. ¡Pasos iniciales cruciales para tener un servidor protegido!
+tags:
+  - VPS
+  - Seguridad
+featured: false
+---
+Desde hace ya varios años, he contratado algunos VPS (Servidor Privado Virtual por sus siglas en inglés) para alojar y probar diferentes aplicaciones. Y algo que siempre me ha pasado al momento de contratar un VPS, es el tener que buscar algunas guías para tener un servidor seguro y con aplicaciones expuestas.
+
+¿Por qué ha sido necesario? Porque como no es algo tan frecuente, algunas cosas se olvidan. Lo que no se olvida, es cuando tratas tu VPS como si fuese una computadora más (que siendo sinceros, algo hay de eso) y por esa razón empiezas a recibir notificaciones que tu espacio en disco se ha agotado, o que el servidor ha sido dado de baja porque se convirtió en un zombie que manda spam o ataques de denegación de servicio... todo eso, por dejar de lado la seguridad.
+
+La primera vez que instalé WordPress y quería aprender a usar php, en un par de días mi blog desapareció y me bloquearon mi cuenta por un tiempo, ya que mi servidor se estaba usando para mandar spam sin control.
+
+Así que he decidido escribir una serie de guías de las cosas que hago en todos mis VPS al momento de adquirirlos. Para esta guía se asumirá que el VPS corre Ubuntu Server y que tienes los datos de usuario root y dirección IP para conectarte por SSH.
+
+## **SSH, la puerta principal a tu servidor**
+
+Cuando se contrata el servicio de un VPS, la principal manera de interactuar con este es mediante SSH. Por tal motivo, es importante asegurarnos que esta conexión sea la primera y de las más importantes líneas de defensa.
+
+El proveedor del servicio por lo general, te dará una dirección IP, y la contraseña de usuario de `root`. Para conectarte al servidor tendrás que hacer lo siguiente desde la terminal, solo cambia 123.45.678.90 con la dirección IP correspondiente. **Nota: En esta guía yo usaré la dirección IP 123.45.678.90 en los ejemplos**.
+
+```bash
+ssh root@123.45.678.90
+```
+
+La primera vez que estableces una conexión con SSH a un servidor, se te mostrará un mensaje para que aceptes la conexión. Este mensaje incluye la "huella dactilar" de la clave del servidor. En el mejor de los casos, el proveedor te la proporciona para verificar que te estés conectado al servidor correcto.
+
+Después de aceptar la conexión, se te pedirá la contraseña del usuario `root`, y tendrás que escribirla.
+
+\
+⚠️ En la terminal no verás que aparezcan los caracteres, eso es normal
+
+```bash
+root@123.45.678.90's password:
+Welcome to Ubuntu 22.04.5 LTS (GNU/Linux 5.15.0-140-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/pro
+
+ System information as of Thu Aug  7 09:12:55 PM CEST 2025
+
+  System load:           0.0
+  Usage of /:            60.7% of 18.59GB
+  Memory usage:          42%
+  Swap usage:            0%
+  Processes:             120
+  Users logged in:       0
+  IPv4 address for eth0: 123.45.678.90
+  IPv6 address for eth0: :::::::
+
+
+```
+
+### **Primer acción. Cambiar la contraseña de root**
+
+Como lo mencioné antes, por lo general la contraseña de `root` se te enviará por email. Y es importante cambiarla, ¿por qué? Porque el usuario de `root` tiene permiso para hacer absolutamente todo en el sistema. Así que es importante cambiar la contraseña para evitar cualquier percance o filtración si tu cuenta de email es comprometida.
+
+* Inicia sesión en tu VPS como `root` usando la contraseña proporcionada
+* Cambia la contraseña de `root` con el comando `passwd`
+
+```bash
+passwd
+```
+
+Se te pedirá que introduzcas la contraseña actual y luego la nueva contraseña dos veces. Elige una contraseña fuerte y única. Recuerda, no verás los caracteres que estés escribiendo.
+
+### **Segunda acción. Crea un nuevo usuario con privilegios sudo**
+
+Iniciar sesión directamente como `root` es una mala práctica de seguridad. Vamos a crear un usuario con privilegios `sudo` para tareas que requieran permisos elevados (como los que tiene el usuario `root`).
+
+1. Crea un nuevo usuario con el comando `adduser`. Cambia `miusuario` por el nombre de usuario que prefieras. Se te pedirá una contraseña y otra información como nombre, teléfono, entre otros. Pero puedes dejar los campos en blanco. El objetivo es que este usuario sea el único que tenga acceso al servidor mediante SSH
+
+```bash
+adduser miusuario
+```
+
+2. Otorgamos privilegios de ejecutar comandos como si fuese el usuario `root`
+
+```bash
+usermod -aG sudo miusuario
+```
+
+Si todo ha salido bien es hora de probar que este usuario pueda ejecutar comandos con `sudo` , cierra la conexión SSH con el comando `exit` e intenta iniciar sesión con el nuevo usuario.
+
+```bash
+ssh miusuario@123.45.678.90
+miusuario@123.45.678.90's password:
+```
+
+Después de poner tu contraseña, deberás ver el mensaje de bienvenida. Ahora solo falta verificar que puedas ejecutar comandos con `sudo`. Escribe lo siguiente en la terminal:
+
+```bash
+sudo ls -al /root
+```
+
+Verás un mensaje donde se te pide que escribas tu contraseña, esto es normal, ya que cada vez que ejecutes un comando con sudo por primera vez en la sesión, tendrás que proporcionarla.
+
+Al final, verás un listado de los contenidos del directorio `/root`. Si es así, felicidades! De aquí en adelante, usaremos este usuario para todas las tareas.
+
+### **Tercera acción. Usar autenticación con claves SSH**
+
+Ahora agregaremos una capa de seguridad más. El utilizar claves SSH en vez de usuario y contraseña es más seguro.
+
+Primero crearemos una clave SSH en nuestro equipo. Si quieres aprender más sobre SSH, da una leída a la [documentación que provee GitHub](https://docs.github.com/es/authentication/connecting-to-github-with-ssh/about-ssh?ref=ignaciops.dev), es muy clara e informativa.
+
+Abre una nueva terminal y ejecuta el siguiente comando, recuerda cambiar "laptop" por cualquier palabra que identifique el equipo en el que estás, o puedes poner tu correo electrónico, en caso de que más adelante, autorices a otros usuarios a acceder a tu VPS.
+
+```bash
+ssh-keygen -t ed25519 -C "laptop"
+```
+
+Se te pedirá que confirmes el nombre del archivo de la clave y ubicación, presiona `Enter` para dejar la ubicación predeterminada, también se te pedirá una contraseña, en caso de agregar una, se te pedirá que confirmes una vez más. O presiona `Enter` para dejarla en blanco.
+
+El comando anterior genera una clave privada y una pública, cada una en su respectivo archivo (`id_ed25519` y `id_ed25519.pub`).
+
+Ya con nuestra clave SSH pública, es momento de agregarla al servidor.
+
+```bash
+ssh miusuario@123.45.678.90
+
+mkdir /home/miusuario/.ssh
+
+nano /home/miusuario/.ssh/authorized_keys
+```
+
+Ya que esté abierto nano, debes copiar y pegar el contenido del archivo `id_ed25519.pub`, para salir de nano presiona `Ctrl + o` y `Ctrl + x` .
+
+Ahora tenemos que darle los suficientes permisos de seguridad al archivo `authorized_keys`, si no lo hacemos, el servicio SSH lo ignorará y no será utilizado.
+
+```bash
+chmod 0600 /home/miusuario/.ssh/authorized_keys
+```
+
+Ejecuta el siguiente comando en la terminal, recuerda, para este momento se espera que hayas iniciado sesión con el usuario que creamos en pasos anteriores.
+
+```bash
+sudo ssh-keygen -f /etc/ssh/ssh_host_ed25519 -N '' -t ed25519
+```
+
+Con el comando anterior, se crea una clave pública y una privada, las cuales se guardan en el directorio `/etc/ssh/`.
+
+Si prestas atención, estamos habilitando el tipo de clave que generamos en nuestro equipo para que sea autorizado para autenticarnos (`ed25519`).
+
+Ahora hay que modificar la configuración SSH con el comando:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Busca y remueve el comentario (el símbolo #) en la línea:
+
+```
+#HostKey /etc/ssh/ssh_host_ed25519_key
+```
+
+Sin el comentario debe verse:
+
+```bash
+HostKey /etc/ssh/ssh_host_ed25519_key
+```
+
+Para guardar el cambio y salir de nano presiona la tecla `Ctrl`+`o` aceptas con `Enter` y luego `Ctrl`+`x` para salir. Ahora hay que reiniciar el servidor SSH para que el cambio tome efecto, ejecuta el comando:
+
+```bash
+sudo systemctl restart ssh
+```
+
+Es hora de probar de que lo que hicimos funcione. Cierra la conexión al servidor, e intenta iniciar sesión con la nueva clave.
+
+```bash
+ssh -i <home>/.ssh/id_ed25519 miusuario@123.45.678.90
+```
+
+Debes sustituir `<home>` con el directorio home de tu usuario en tu computadora (remueve \< >). Al ejecutar el comando, se te pedirá la contraseña de la clave, en caso de que hayas puesto una. Y si todo funciona correctamente, podrás iniciar sesión sin necesidad de usar la contraseña del usuario en tu servidor.
+
+### **Cuarta acción. Deshabilitar la autenticación por contraseña**
+
+Si tuviste éxito en el paso anterior, ahora podrás conectarte a tu servidor sin necesidad de tu contraseña. El objetivo de deshabilitarla completamente es evitar ataques de fuerza bruta.
+
+❗
+
+No hagas los siguientes pasos si no puedes conectarte con la clave SSH. Prueba varias veces antes de deshabilitar para evitar perder el acceso.
+
+Habiendo establecido la conexión al servidor, ejecuta el siguiente comando
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Dentro del archivo, busca y modifica la siguiente línea:
+
+```
+#PasswordAuthentication yes
+```
+
+Por:
+
+```bash
+PasswordAuthentication no
+```
+
+Guarda los cambios y cierra nano. Después, reinicia el servicio SSH y cierra la sesión.
+
+Ahora intenta iniciar sesión con tu contraseña desde la terminal
+
+```bash
+ssh miusuario@123.45.678.90
+```
+
+Deberías recibir un error, de que no es posible conectarse. Ahora, intenta iniciar sesión con la clave SSH.
+
+```bash
+ssh -i <home>/.ssh/id_ed25519 miusuario@123.45.678.90
+```
+
+Si estás dentro, felicidades! Tu servidor es un poco más seguro.
+
+### **Quinta acción. Deshabilitar el inicio de sesión como Root**
+
+Ahora que nuestro usuario tiene privilegios `sudo` y puede acceder por clave SSH, podemos deshabilitar completamente el inicio de sesión directo como `root`.
+
+Abrimos el archivo de configuración SSH de nuevo, para buscar y cambiar la siguiente linea:
+
+```
+#PermitRootLogin prohibit-password
+```
+
+Por
+
+```bash
+PermitRootLogin no
+```
+
+Cerramos nano y nuevamente reiniciamos el servicio SSH. Y listo! Hemos terminado con este paso.
+
+### **Sexta acción (opcional). Cambiar el puerto SSH por defecto**
+
+El siguiente paso, en caso de que decidas aplicarlo será cambiar el puerto por defecto que el sistema utiliza para recibir las conexiones SSH, en este caso, el puerto 22.
+
+Muchos ataques buscan si los puertos determinados del sistema, como el 22, están abiertos o aceptando conexiones para hacer ataques de fuerza bruta o buscar vulnerabilidades. De ahí las medidas previas que hemos aplicado.
+
+¿Por qué es opcional este paso? En lo personal, ya algunas veces me ha tocado recibir notificaciones de algún proveedor de servicio cuando estoy sufriendo ataques, y te sorprendería los números de puerto tan altos que vienen en los logs.
+
+Sí, ya es común que aparte de buscar en los puertos por defecto, muchos usuarios mal intencionados usarán herramientas para verificar **todos los puertos** de tu servidor para ver cuales están abiertos. Así que este paso es solo para hacerles el trabajo un poco más difícil.
+
+Si es algo que quieras agregar, haremos lo siguiente. Inicia una conexión SSH al servidor desde la terminal, una vez tengamos la sesión iniciada, abrimos el archivo de configuración de SSH
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Busca y modifica la línea `Port 22` a un puerto diferente y que no esté en uso (ej. `22222` pero si no quieres tener problemas escoge uno entre los siguientes `49152 – 65535`). Recuerda muy bien el puerto que escogiste!
+
+Guarda los cambios y cierra nano, ahora solo falta reiniciar el servicio SSH para aplicar los cambios.
+
+```bash
+sudo systemctl restart ssh
+```
+
+Ahora solo hay que probar que podamos conectarnos a este puerto (22222 en este ejemplo).
+
+```bash
+ssh -i <home>/.ssh/id_ed25519 -p 22222 miusuario@123.45.678.90
+```
+
+Ahora que tenemos lista la configuración del lado de SSH, pasemos al aspecto final que abarcará este post, pero no menos importante.
+
+## **Habilitación de cortafuegos (firewall) con UFW**
+
+Primero, ¿qué es un cortafuegos? Un cortafuegos es un sistema que se encarga de controlar el tráfico entrante y saliente de un dispositivo o una red, el objetivo es que solo los datos que cumplan ciertas reglas puedan entrar o salir de nuestro servidor.
+
+UFW (Uncomplicated Firewall) es una interfaz sencilla para `iptables` que facilita la gestión de reglas de cortafuegos. Aquí explicaré lo mínimo indispensable, si quieres aprender más, este es el [enlace a la documentación oficial](https://help.ubuntu.com/community/UFW?ref=ignaciops.dev).
+
+⚠️
+
+Debemos tener cuidado al establecer las reglas del cortafuegos, ya que no queremos quedarnos fuera de nuestro servidor por accidente.
+
+Primero, iniciamos sesión mediante SSH a nuestro servidor, recuerda usar el comando que especifica el puerto (en caso de haberlo cambiado) y el archivo con la clave SSH.
+
+**Permitir conexiones SSH en el nuevo puerto** (cambia 22222 por el puerto que hayas seleccionado)
+
+```bash
+sudo ufw allow 22222/tcp
+```
+
+Si no cambiaste el puerto SSH
+
+```bash
+sudo ufw allow ssh
+```
+
+**Permitir el tráfico web (HTTP y HTTPS)**
+
+```bash
+sudo ufw allow http
+sudo ufw allow https
+```
+
+O si prefieres habilitarlo por puerto:
+
+```bash
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+```
+
+**Habilitamos UFW para que las reglas se activen**
+
+```bash
+sudo ufw enable
+```
+
+Se te pedirá que confirmes tus reglas, así que presiona la tecla `y` cuando se te pida confirmación.
+
+**Verifica que UFW está habilitado correctamente**
+
+```bash
+sudo ufw status verbose
+```
+
+Y como resultado verás una lista de los puertos o reglas activos al momento. Y eso es todo! Ya tienes un cortafuegos básico que bloqueará los puertos que no se están usando, te permite que te conectes por SSH y que permite el tráfico web.
+
+## **Qué sigue...**
+
+Antes que nada... si llegaste hasta aquí has logrado lo siguiente:
+
+* ✅ Cambiaste la contraseña de root
+* ✅ Creaste un usuario que puede usar sudo
+* ✅ Configuraste el acceso con clave SSH
+* ✅ Deshabilitaste el acceso por contraseña
+* ✅ Deshabilitaste el inicio de sesión como root
+* ✅ (Opcional) Cambiaste el puerto SSH por defecto
+
+Felicidades! Has mejorado la seguridad de tu servidor VPS. Todavía hay otras cosas que podemos hacer para mejorar la seguridad de nuestro servidor, como tener una vigilancia activa, la cual nos permitirá detectar intrusos y hará mantenimiento a nuestro servidor, pero eso será para una nueva publicación.
+
+Si lo que has leído te ha servido, o consideras que hay un error que necesita ser cambiado, no dudes en mandarme un correo o ponerte en contacto por alguna de mis redes.

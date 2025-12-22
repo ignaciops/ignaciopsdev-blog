@@ -1,0 +1,16 @@
+---
+import Tag from './Tag.astro';
+
+interface Props {
+  tags: string[];
+  size?: 'sm' | 'md';
+}
+
+const { tags, size = 'sm' } = Astro.props;
+---
+
+{tags && tags.length > 0 && (
+  <div data-testid="tag-list" class="flex flex-wrap gap-2">
+    {tags.map(tag => <Tag tag={tag} size={size} />)}
+  </div>
+)}

@@ -1,0 +1,110 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { siteConfig } from '../config/site';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  publishedTime?: Date;
+  tags?: string[];
+  floatingHeader?: boolean;
+  wideContainer?: boolean;
+}
+
+const {
+  title = siteConfig.title,
+  description = siteConfig.description,
+  ogImage = siteConfig.defaultOgImage,
+  ogType = 'website',
+  publishedTime,
+  tags = [],
+  floatingHeader = false,
+  wideContainer = false
+} = Astro.props;
+
+// Construct full URL for OG image
+const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro.site || 'http://localhost:4321').href;
+---
+
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <!-- OpenGraph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content={siteConfig.locale} />
+
+    {publishedTime && (
+      <meta property="article:published_time" content={publishedTime.toISOString()} />
+    )}
+
+    {tags.length > 0 && tags.map(tag => (
+      <meta property="article:tag" content={tag} />
+    ))}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Umami Analytics -->
+    {import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+      <script
+        is:inline
+        defer
+        src={import.meta.env.PUBLIC_UMAMI_SCRIPT_URL || 'https://cloud.umami.is/script.js'}
+        data-website-id={import.meta.env.PUBLIC_UMAMI_WEBSITE_ID}
+      ></script>
+    )}
+
+    <!-- Script bloqueante para evitar FOUC (Flash of Unstyled Content) en Dark Mode -->
+    <script is:inline>
+        const theme = (() => {
+            if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+                return localStorage.getItem('theme');
+            }
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        })();
+
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        window.localStorage.setItem('theme', theme);
+    </script>
+</head>
+<body data-testid="page-body" class="bg-light dark:bg-dark text-gray-800 dark:text-gray-100 font-serif transition-colors duration-300 min-h-screen flex flex-col">
+
+    <!-- HEADER COMÚN -->
+    <Header floating={floatingHeader} />
+
+    <slot name="hero" />
+
+    <!-- CONTENIDO ESPECÍFICO (Se expande para ocupar espacio disponible) -->
+    <main data-testid="main-content" class={`flex-grow w-full mx-auto px-4 py-4 md:py-12 ${wideContainer ? 'max-w-6xl' : 'max-w-3xl'}`}>
+        <slot />
+    </main>
+
+    <!-- FOOTER COMÚN -->
+    <Footer />
+
+</body>
+</html>

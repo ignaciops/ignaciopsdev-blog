@@ -1,0 +1,28 @@
+---
+import { siteConfig } from '../config/site';
+
+interface Props {
+    text: string;
+    textColor?: 'default' | 'light';
+}
+
+const { text, textColor = 'default' } = Astro.props;
+
+// Función para calcular el tiempo de lectura
+function calculateReadingTime(text: string): number {
+    if (!text) return 0;
+    const wordsPerMinute = siteConfig.readingSpeed;
+    // Usamos una expresión regular para contar palabras, incluyendo caracteres latinos
+    const words = text.match(/[\w\u00C0-\u017F]+/g);
+    const wordCount = words ? words.length : 0;
+    return Math.ceil(wordCount / wordsPerMinute);
+}
+
+const readingTime = calculateReadingTime(text);
+
+const colorClass = textColor === 'light' ? 'text-gray-200' : 'text-gray-500';
+---
+
+<span data-testid="reading-time" class={`text-xs font-sans uppercase tracking-wider ${colorClass}`}>
+    {readingTime} min de lectura
+</span>

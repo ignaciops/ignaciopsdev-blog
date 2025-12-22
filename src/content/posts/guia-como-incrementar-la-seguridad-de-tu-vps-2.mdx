@@ -1,0 +1,237 @@
+---
+title: Guía. Cómo incrementar la seguridad de tu VPS [2/3]
+date: 2025-12-27
+coverImage: >-
+  /images/posts/covers/guia-como-incrementar-la-seguridad-de-tu-vps-2/coverImage.jpg
+coverImageAttribution: >-
+  Foto de <a
+  href="https://unsplash.com/es/@growtika?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Growtika</a>
+  en <a
+  href="https://unsplash.com/es/fotos/icono-VofYoHuMWyc?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+summary: >-
+  En este segundo artículo aprenderás lo necesario para implementar Fail2ban,
+  actualizaciones automáticas, Logseq y AIDE en tu servidor. 
+tags:
+  - VPS
+  - Seguridad
+featured: false
+---
+En la publicación anterior analizamos algunas medidas de seguridad que se pueden implementar al momento de adquirir un VPS.
+
+Los pasos descritos en la primera parte nos ayudaron a "cerrar la puerta de acceso" de nuestro servidor. Sin embargo, eso no es suficiente. En esta segunda parte intentaré explicarte qué otras cosas podemos implementar para prevenir ataques de fuerza bruta, tener siempre actualizado nuestro servidor, entre otras.
+
+## Protección contra Ataques de Fuerza Bruta con Fail2ban
+
+¿Qué es un ataque de fuerza bruta? Podríamos resumirlo en un ataque donde alguien intenta adivinar contraseñas **probando todas las combinaciones posibles**, una tras otra, hasta encontrar la correcta.
+
+Fail2ban se encarga de monitorear los logs del servidor y bloquea automáticamente las direcciones IP que muestren signos de intentos de ataque (como múltiples intentos fallidos de inicio de sesión SSH).
+
+Para instalar Fail2ban en nuestro servidor, necesitamos acceder a nuestro servidor mediante SSH con nuestro usuario con permisos de ejecutar comandos con sudo.
+
+### Instalando Fail2ban
+
+```
+sudo apt update
+sudo apt install fail2ban
+```
+
+### Crea y edita el archivo de configuración local
+
+```
+sudo nano /etc/fail2ban/jail.local
+```
+
+Añade o modifica las siguientes líneas para habilitar la protección SSH y configurar notificaciones:
+
+```
+[DEFAULT]
+bantime = 1d
+findtime = 10m
+maxretry = 5
+destemail = tu-email@ejemplo.com
+sendername = Fail2ban
+mta = sendmail
+action_mwl = %(action_)s
+%(mta)s-whois-lines[sender="%(sender)s", dest="%(destemail)s", logpath="%(logpath)s", chain="%(chain)s"]
+
+[sshd]
+enabled = true
+port = 22222 # O el puerto SSH que hayas configurado en la primera parte de la guía.
+```
+
+¿Qué significan esas líneas?
+
+El parámetro `bantime` determina el tiempo que un cliente será baneado cuando falla la autenticación.
+
+El comando `findtime` establece una ventana de tiempo, en este caso 10 minutos, en la cual un cliente tendrá como límite de intentos `maxretry` 5 veces, antes de ser baneado.
+
+Las otras líneas contienen los parámetros para habilitar la notificación por email cuando Fail2ban bloquea a un intruso.
+
+Puedes añadir más "jails" para otros servicios como Caddy si suspechas que pueda haber ataques específicos.
+
+Guardamos los cambios con `Ctrl + o` y `Ctrl + x`
+
+### Reiniciamos Fail2ban para aplicar los cambios
+
+```
+sudo systemctl restart fail2ban
+```
+
+### Verificamos el estado de Fail2ban y que las configuraciones estén activas.
+
+```
+sudo fail2ban-client status
+sudo fail2ban-client status sshd
+```
+
+Después de haber realizado estos pasos, Fail2ban bloqueará cualquier intruso, y también habilitamos la vigilancia del servicio de SSH en el puerto que hemos especificado.
+
+## Mantener el Sistema Operativo actualizado
+
+Quizás has escuchado que personas malintencionadas se valen de errores que encuentran en aplicaciones para lograr sus fines. Las actualizaciones de seguridad son vitales para proteger nuestro servidor de vulnerabilidades conocidas. Ubuntu server puede aplicar actualizaciones de seguridad de forma automática.
+
+1. Instalamos el paquete necesario (en caso de que no esté instalado por default)
+
+```
+sudo apt install unattended-upgrades
+```
+
+2. Configuramos las actualizaciones automáticas.
+   Abriremos el siguiente archivo con nano:
+
+```
+sudo nano /etc/apt/apt.conf.d/50unattended-upgrades
+```
+
+Nos aseguramos de que las siguientes líneas no estén comentadas (sin // al inicio de la línea):
+
+```
+Unattended-Upgrade::Allowed-Origins {
+        "${distro_id}:${distro_codename}-security";
+        // "${distro_id}:${distro_codename}-updates";
+        // "${distro_id}:${distro_codename}-proposed";
+        // "${distro_id}:${distro_codename}-backports";
+};
+```
+
+Guardamos nuestros cambios con `Ctrl + o` y `Ctrl + x`.
+
+3. Opcional. Habilita el reinicio automático
+   Este paso es opcional, puedes habilitarlo para que el equipo se reinicie automáticamente cuando una actualización así lo requiera.
+
+Ojo, lo marco como opcional porque hay que tener cuidado. Ya que esta acción puede interrumpir servicios que quizás necesites activos a ciertas horas.
+
+Busca las siguientes líneas, quita los comentarios y establece una hora para el reinicio automático.
+
+```
+// Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Automatic-Reboot "true";
+// Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+Unattended-Upgrade::Automatic-Reboot-Time "03:00";
+```
+
+Guardamos los cambios y salimos de nano.
+
+4. Habilitamos el proceso de actualizaciones desatendidas.
+
+```
+sudo dpkg-reconfigure --priority=low unattended-upgrades
+```
+
+Sigue las instrucciones en la terminal para terminar de habilitar las actualizaciones automáticas.
+
+Y con eso, cada vez que haya una actualización de seguridad, Ubuntu server se encargará de aplicar esta actualización.
+
+## Monitoreo de Logs con Logcheck
+
+Logcheck es una herramienta sencilla y de bajo consumo de recursos que te envía resúmenes por correo electrónico de eventos inusuales en tus logs. Se ejecuta directamente en el servidor (no en un contenedor).
+
+### Instalar Logcheck
+
+```
+sudo apt install logcheck
+```
+
+### Configuración básica
+
+Logcheck ya viene con reglas predeterminadas. Puedes configurar a qué dirección de correo electrónico se enviarán los informes editando el archivo de configuración:
+
+```
+sudo nano /etc/logcheck/logcheck.conf
+```
+
+Busca la línea `MAILTO=` y cambia `root` a tu dirección de correo electrónico:
+
+```
+MAILTO="tu_email@example.com"
+```
+
+Logcheck se ejecuta automáticamente a través de cron. Si los informes son demasiado "ruidosos", puedes aprender a crear reglas para ignorar mensajes rutinarios consultando la documentación de Logcheck.
+
+## Monitoreo de Integridad de Archivos con AIDE
+
+AIDE (Advanced Intrusion Detection Environment) crea una "huella digital" de tus archivos de sistema y te alerta si algo cambia. Esto es crucial para detectar intrusiones o alteraciones no autorizadas. AIDE también se ejecuta directamente en el servidor.
+
+### Instalar AIDE
+
+```
+sudo apt install aide aide-common
+```
+
+### Inicializar la base de datos de AIDE
+
+Este paso crea la base de datos inicial de tus archivos. Puede tardar un tiempo y consumir recursos, así que hazlo cuando el servidor esté menos ocupado.
+
+```
+sudo aide --init
+```
+
+Esto creará un archivo llamado `aide.db.new.gz` en `/var/lib/aide/`.
+
+### Activar la base de datos
+
+Mueve el archivo recién creado para que AIDE lo use como su base de datos activa.
+
+```
+sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+```
+
+### Programar verificaciones regulares con Cron
+
+Puedes añadir una entrada a tu crontab para que AIDE se ejecute automáticamente (por ejemplo, diariamente a las 3:30 AM).
+
+```
+sudo crontab -e
+```
+
+Añade la siguiente línea al final del archivo:
+
+```
+30 3 * * * /usr/bin/aide --check | mail -s "Informe de Integridad de AIDE" tu_email@example.com
+```
+
+Esto ejecutará AIDE y te enviará un correo electrónico con los resultados.
+
+### Actualizar la base de datos de AIDE
+
+Cuando realices actualizaciones legítimas del sistema o cambios en la configuración, deberás actualizar la base de datos de AIDE para evitar falsas alarmas.
+
+```
+sudo aide --update
+sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+```
+
+**¡Importante!** Guarda una copia de tu base de datos y archivo de configuración de AIDE en un lugar seguro (fuera del VPS) para mayor protección.
+
+## Conclusión
+
+En esta segunda parte hemos implementado medidas adicionales de seguridad que trabajan de manera proactiva para proteger tu VPS:
+
+* **Fail2ban** bloquea automáticamente los intentos de ataque de fuerza bruta
+* **Actualizaciones automáticas** mantienen tu sistema protegido contra vulnerabilidades conocidas
+* **Logcheck** te mantiene informado de eventos inusuales en tu servidor
+* **AIDE** detecta cambios no autorizados en tus archivos de sistema
+
+Estas herramientas, combinadas con las configuraciones básicas de la primera parte, forman una sólida base de seguridad para tu VPS. En la tercera y última parte de esta guía, exploraremos medidas de seguridad más avanzadas.
+
+¿Has implementado alguna de estas medidas?

@@ -1,0 +1,72 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import PostCard from '../components/PostCard.astro';
+import FeaturedPost from '../components/FeaturedPost.astro';
+import { siteConfig } from '../config/site';
+import { getAllPosts, getFeaturedPosts } from '../utils/collections';
+import heroBackgroundImage from '../assets/images/home/heroBackgroundImage.png';
+
+const home = await getEntry('home', 'index');
+if (!home) {
+    throw new Error('Home page content not found');
+}
+
+const featured = await getFeaturedPosts();
+const latestPosts = (await getAllPosts())
+  .filter(post => !post.data.featured)
+  .slice(0, siteConfig.recentPostsCount);
+---
+
+<BaseLayout title={siteConfig.title} floatingHeader={true}>
+    <Hero
+        slot="hero"
+        title={home.data.heroTitle}
+        description={home.data.heroDescription}
+        buttons={home.data.heroButtons}
+        backgroundImage={heroBackgroundImage}
+    />
+
+    {featured.length > 0 && (
+      <section data-testid="featured-posts-section" class="py-8 mb-8">
+        <div class="grid grid-cols-1 gap-8">
+          {featured.slice(0, 1).map(post => (
+            <FeaturedPost
+              title={post.data.title}
+              slug={post.slug}
+              date={post.data.date}
+              summary={post.data.summary || ''}
+              tags={post.data.tags}
+              readingText={post.body}
+              coverImage={post.data.coverImage}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- LATEST POSTS SECTION -->
+    <section data-testid="recent-posts-section" class="py-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="flex justify-between items-end mb-8">
+                <h2 class="font-sans font-bold text-3xl text-gray-900 dark:text-white">Recientes</h2>
+                <a href="/blog" class="font-sans text-brand-600 dark:text-brand-400 hover:underline">Ver todo →</a>
+            </div>
+
+            <div data-testid="recent-posts-list" class="space-y-12">
+                {latestPosts.map((post) => (
+                    <PostCard
+                        title={post.data.title}
+                        slug={post.slug}
+                        date={post.data.date}
+                        summary={post.data.summary || ''}
+                        tags={post.data.tags}
+                        readingText={post.body}
+                    />
+                ))}
+            </div>
+        </div>
+    </section>
+
+</BaseLayout>

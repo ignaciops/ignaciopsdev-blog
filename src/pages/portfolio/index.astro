@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RepoCard from '../../components/RepoCard.astro';
+
+const projects = await getCollection('portfolio');
+---
+
+<BaseLayout title="Ignacio PS - Portafolio">
+    <div class="mb-12">
+        <h1 class="font-sans font-bold text-4xl mb-4 text-gray-900 dark:text-white">Portafolio</h1>
+        <p class="prose dark:prose-invert max-w-none">
+            Aquí encontrarás una selección de proyectos en los que he trabajado, y también los avances de mi ruta de aprendizaje de arquitectura de pruebas durante el año 2026.
+        </p>
+        <p class="prose dark:prose-invert max-w-none">
+            Por favor, esta atento a las actualizaciones regulares. Espera actualizaciones mensuales con nuevos proyectos.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        {projects.map((project) => (
+            <RepoCard
+                title={project.data.name}
+                description={project.data.description}
+                tags={project.data.stack}
+                repoUrl={`/portfolio/${project.slug}`}
+            />
+        ))}
+    </div>
+</BaseLayout>

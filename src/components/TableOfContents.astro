@@ -1,0 +1,53 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter to only h2 and h3 for cleaner TOC
+const filteredHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 3);
+
+// Pre-calculate indentation classes (Tailwind-safe)
+const getIndentClass = (depth: number): string => {
+  if (depth === 2) return '';
+  if (depth === 3) return 'pl-4';
+  return 'pl-8';
+};
+---
+
+{filteredHeadings.length > 0 && (
+  <aside data-testid="table-of-contents" class="hidden lg:block lg:col-span-4 sticky top-8">
+    <div class="p-4 border-l border-gray-200 dark:border-gray-800">
+      <h2 class="font-sans font-bold text-sm uppercase text-gray-500 mb-4 tracking-wider">
+        En este artículo
+      </h2>
+      <nav data-testid="toc-navigation">
+        <ul class="space-y-2 text-sm">
+          {filteredHeadings.map((heading) => (
+            <li class={getIndentClass(heading.depth)}>
+              <a
+                data-testid={`toc-link-${heading.slug}`}
+                href={`#${heading.slug}`}
+                class={`
+                  block text-gray-600 dark:text-gray-400
+                  hover:text-brand-600 dark:hover:text-brand-400
+                  transition-colors
+                  ${heading.depth === 2 ? 'font-semibold' : ''}
+                `}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </aside>
+)}

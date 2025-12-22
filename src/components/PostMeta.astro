@@ -1,0 +1,30 @@
+---
+import ReadingTime from './ReadingTime.astro';
+import { formatDate } from '../utils/dates';
+import type { DateFormat } from '../utils/dates';
+
+interface Props {
+  date: Date;
+  readingText: string;
+  variant?: 'inline' | 'stacked';
+  dateFormat?: DateFormat;
+  textColor?: 'default' | 'light';
+}
+
+const { date, readingText, variant = 'inline', dateFormat = 'short', textColor = 'default' } = Astro.props;
+
+const containerClass = variant === 'inline'
+  ? 'flex items-center gap-4'
+  : 'space-y-1';
+
+const colorClass = textColor === 'light'
+  ? 'text-gray-200'
+  : 'text-gray-500';
+---
+
+<div data-testid="post-meta" class={`text-sm font-sans ${containerClass} ${colorClass}`}>
+  <time data-testid="post-date" datetime={date.toISOString()} class="text-xs font-sans font-bold uppercase tracking-wider">
+    {formatDate(date, dateFormat)}
+  </time>
+  <ReadingTime text={readingText} textColor={textColor} />
+</div>

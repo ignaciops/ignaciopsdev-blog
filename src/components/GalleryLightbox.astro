@@ -1,0 +1,51 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface GalleryImage {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  images: GalleryImage[];
+}
+
+const { images } = Astro.props;
+---
+
+<div data-testid="gallery-lightbox" class="gallery-lightbox grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+  {images.map((image, index) => (
+    <div data-testid={`gallery-lightbox-item-${index}`} class="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden cursor-pointer">
+      <Image src={image.src} alt={image.alt} class="w-full h-auto" />
+      {image.caption && (
+        <p class="p-4 text-sm text-gray-600 dark:text-gray-400">{image.caption}</p>
+      )}
+    </div>
+  ))}
+</div>
+
+<script>
+import * as basicLightbox from 'basiclightbox';
+import 'basiclightbox/dist/basicLightbox.min.css';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const gallery = document.querySelector('.gallery-lightbox');
+    if (gallery) {
+        gallery.addEventListener('click', (e) => {
+            const target = e.target as HTMLElement;
+            const imageWrapper = target.closest('div');
+            if (imageWrapper) {
+                const img = imageWrapper.querySelector('img');
+                if (img) {
+                    const instance = basicLightbox.create(`
+                        <img src="${img.src}" alt="${img.alt}">
+                    `);
+                    instance.show();
+                }
+            }
+        });
+    }
+});
+</script>

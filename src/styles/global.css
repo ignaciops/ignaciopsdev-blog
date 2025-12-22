@@ -1,0 +1,7 @@
+
+@config "../../tailwind.conf.mjs";
+@import "tailwindcss";
+
+html {
+    overflow-y: scroll;
+}
