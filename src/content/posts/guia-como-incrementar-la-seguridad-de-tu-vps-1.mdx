@@ -5,8 +5,8 @@ summary: >-
   En esta serie aprenderás como asegurar el acceso SSH y a configurar tu
   cortafuegos UFW. ¡Pasos iniciales cruciales para tener un servidor protegido!
 tags:
-  - VPS
-  - Seguridad
+  - vps
+  - seguridad
 featured: false
 ---
 Desde hace ya varios años, he contratado algunos VPS (Servidor Privado Virtual por sus siglas en inglés) para alojar y probar diferentes aplicaciones. Y algo que siempre me ha pasado al momento de contratar un VPS, es el tener que buscar algunas guías para tener un servidor seguro y con aplicaciones expuestas.
@@ -31,8 +31,7 @@ La primera vez que estableces una conexión con SSH a un servidor, se te mostrar
 
 Después de aceptar la conexión, se te pedirá la contraseña del usuario `root`, y tendrás que escribirla.
 
-\
-⚠️ En la terminal no verás que aparezcan los caracteres, eso es normal
+<Callout type="info" content="En la terminal no verás que aparezcan los caracteres, eso es normal." />
 
 ```bash
 root@123.45.678.90's password:
@@ -182,9 +181,7 @@ Debes sustituir `<home>` con el directorio home de tu usuario en tu computadora 
 
 Si tuviste éxito en el paso anterior, ahora podrás conectarte a tu servidor sin necesidad de tu contraseña. El objetivo de deshabilitarla completamente es evitar ataques de fuerza bruta.
 
-❗
-
-No hagas los siguientes pasos si no puedes conectarte con la clave SSH. Prueba varias veces antes de deshabilitar para evitar perder el acceso.
+<Callout type="warning" content="No hagas los siguientes pasos si no puedes conectarte con la clave SSH. Prueba varias veces antes de deshabilitar para evitar perder el acceso." />
 
 Habiendo establecido la conexión al servidor, ejecuta el siguiente comando
 
@@ -276,9 +273,7 @@ Primero, ¿qué es un cortafuegos? Un cortafuegos es un sistema que se encarga d
 
 UFW (Uncomplicated Firewall) es una interfaz sencilla para `iptables` que facilita la gestión de reglas de cortafuegos. Aquí explicaré lo mínimo indispensable, si quieres aprender más, este es el [enlace a la documentación oficial](https://help.ubuntu.com/community/UFW?ref=ignaciops.dev).
 
-⚠️
-
-Debemos tener cuidado al establecer las reglas del cortafuegos, ya que no queremos quedarnos fuera de nuestro servidor por accidente.
+<Callout type="warning" content="Debemos tener cuidado al establecer las reglas del cortafuegos, ya que no queremos quedarnos fuera de nuestro servidor por accidente." />
 
 Primero, iniciamos sesión mediante SSH a nuestro servidor, recuerda usar el comando que especifica el puerto (en caso de haberlo cambiado) y el archivo con la clave SSH.
 
@@ -328,12 +323,12 @@ Y como resultado verás una lista de los puertos o reglas activos al momento. Y 
 
 Antes que nada... si llegaste hasta aquí has logrado lo siguiente:
 
-* ✅ Cambiaste la contraseña de root
-* ✅ Creaste un usuario que puede usar sudo
-* ✅ Configuraste el acceso con clave SSH
-* ✅ Deshabilitaste el acceso por contraseña
-* ✅ Deshabilitaste el inicio de sesión como root
-* ✅ (Opcional) Cambiaste el puerto SSH por defecto
+* Cambiaste la contraseña de root
+* Creaste un usuario que puede usar sudo
+* Configuraste el acceso con clave SSH
+* Deshabilitaste el acceso por contraseña
+* Deshabilitaste el inicio de sesión como root
+* (Opcional) Cambiaste el puerto SSH por defecto
 
 Felicidades! Has mejorado la seguridad de tu servidor VPS. Todavía hay otras cosas que podemos hacer para mejorar la seguridad de nuestro servidor, como tener una vigilancia activa, la cual nos permitirá detectar intrusos y hará mantenimiento a nuestro servidor, pero eso será para una nueva publicación.
 

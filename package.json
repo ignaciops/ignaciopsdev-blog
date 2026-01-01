@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
+    "dev:cms": "astro dev",
     "build": "astro build --config astro.config.static.mjs",
     "preview": "astro preview --config astro.config.static.mjs",
+    "deploy": "npm run build && rsync -avz --delete dist/ nc2:~/containers/caddy/container-data/www/ignaciops.dev/",
     "astro": "astro"
   },
   "dependencies": {

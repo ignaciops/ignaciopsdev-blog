@@ -12,8 +12,8 @@ summary: >-
   En este segundo artículo aprenderás lo necesario para implementar Fail2ban,
   actualizaciones automáticas, Logseq y AIDE en tu servidor. 
 tags:
-  - VPS
-  - Seguridad
+  - vps
+  - seguridad
 featured: false
 ---
 En la publicación anterior analizamos algunas medidas de seguridad que se pueden implementar al momento de adquirir un VPS.
@@ -221,7 +221,7 @@ sudo aide --update
 sudo mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
 ```
 
-**¡Importante!** Guarda una copia de tu base de datos y archivo de configuración de AIDE en un lugar seguro (fuera del VPS) para mayor protección.
+<Callout type="warning" content="¡Importante! Guarda una copia de tu base de datos y archivo de configuración de AIDE en un lugar seguro (fuera del VPS) para mayor protección." />
 
 ## Conclusión
 

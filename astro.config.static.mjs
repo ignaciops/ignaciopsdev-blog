@@ -10,7 +10,15 @@ import mdx from '@astrojs/mdx';
 // Static site configuration (for public website)
 // Build: npm run build:static
 export default defineConfig({
+  site: 'https://ignaciops.dev',
   output: 'static',
+
+  markdown: {
+    shikiConfig: {
+      theme: 'github-dark',
+      wrap: false
+    }
+  },
 
   vite: {
     plugins: [tailwindcss()]
@@ -20,6 +28,7 @@ export default defineConfig({
     components: {
       KeystaticImage: '~/components/mdx/KeystaticImage.astro',
       YouTube: '~/components/mdx/YouTube.astro',
+      Callout: '~/components/mdx/Callout.astro',
     },
   })],
 });

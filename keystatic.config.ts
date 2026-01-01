@@ -99,10 +99,15 @@ export default config({
         }),
 
         tags: fields.array(
-          fields.text({ label: 'Tag' }),
+          fields.text({
+            label: 'Tag',
+            validation: {
+              length: { min: 1 }
+            }
+          }),
           {
             label: 'Tags',
-            description: 'Añade tags para clasificar el post. Sugerencias: tech, talk, retro',
+            description: 'Añade tags para clasificar el post (usa solo minúsculas). Sugerencias: tech, talk, retro',
             itemLabel: props => props.value
           }
         ),
@@ -142,6 +147,30 @@ export default config({
                     }),
                     alt: fields.text({ label: 'Alt text' }),
                     caption: fields.text({ label: 'Caption' })
+                }
+            }),
+            Callout: block({
+                label: 'Callout/Advertencia',
+                schema: {
+                    type: fields.select({
+                        label: 'Tipo',
+                        options: [
+                            { label: '📝 Nota', value: 'note' },
+                            { label: '💡 Consejo', value: 'tip' },
+                            { label: '⚠️ Advertencia', value: 'warning' },
+                            { label: '❗ Peligro', value: 'danger' },
+                            { label: 'ℹ️ Información', value: 'info' }
+                        ],
+                        defaultValue: 'note'
+                    }),
+                    title: fields.text({
+                        label: 'Título (Opcional)',
+                        description: 'Si se deja vacío, no se mostrará título'
+                    }),
+                    content: fields.text({
+                        label: 'Contenido',
+                        multiline: true
+                    })
                 }
             })
           }
@@ -227,6 +256,30 @@ export default config({
                     }),
                     alt: fields.text({ label: 'Alt text' }),
                     caption: fields.text({ label: 'Caption' })
+                }
+            }),
+            Callout: block({
+                label: 'Callout/Advertencia',
+                schema: {
+                    type: fields.select({
+                        label: 'Tipo',
+                        options: [
+                            { label: '📝 Nota', value: 'note' },
+                            { label: '💡 Consejo', value: 'tip' },
+                            { label: '⚠️ Advertencia', value: 'warning' },
+                            { label: '❗ Peligro', value: 'danger' },
+                            { label: 'ℹ️ Información', value: 'info' }
+                        ],
+                        defaultValue: 'note'
+                    }),
+                    title: fields.text({
+                        label: 'Título (Opcional)',
+                        description: 'Si se deja vacío, no se mostrará título'
+                    }),
+                    content: fields.text({
+                        label: 'Contenido',
+                        multiline: true
+                    })
                 }
             })
           }

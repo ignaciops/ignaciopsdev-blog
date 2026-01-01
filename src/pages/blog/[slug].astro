@@ -4,6 +4,7 @@ import { getCollection, getEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import KeystaticImage from '../../components/mdx/KeystaticImage.astro';
 import YouTube from '../../components/mdx/YouTube.astro';
+import Callout from '../../components/mdx/Callout.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -40,5 +41,5 @@ const { Content, headings } = await post.render();
   prev={prev}
   next={next}
 >
-  <Content components={{ YouTube, KeystaticImage }} />
+  <Content components={{ YouTube, KeystaticImage, Callout }} />
 </PostLayout>

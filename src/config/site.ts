@@ -1,7 +1,7 @@
 export const siteConfig = {
   // Brand identity
   name: "Ignacio PS",
-  title: "Ignacio PS - Ingeniería de Software en Pruebas",
+  title: "Ignacio PS",
   description: "Portafolio y Blog de Ingeniería de Software en Pruebas.",
 
   // Author info
