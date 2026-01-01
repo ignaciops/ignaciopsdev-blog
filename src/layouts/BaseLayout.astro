@@ -61,7 +61,7 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro
     <meta name="twitter:image" content={ogImageUrl} />
 
     <!-- Umami Analytics -->
-    {import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && (
+    {import.meta.env.PUBLIC_UMAMI_WEBSITE_ID && !import.meta.env.DEV && (
       <script
         is:inline
         defer

@@ -30,7 +30,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ['lodash'],
+      disabled: 'build'
     },
     ssr: {
       noExternal: ['@keystatic/core', '@keystatic/astro']
