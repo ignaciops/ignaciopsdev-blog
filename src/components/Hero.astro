@@ -24,9 +24,11 @@ const { title, description, buttons, backgroundImage } = Astro.props;
       <Image
         data-testid="hero-background-image"
         src={backgroundImage}
-        alt="Background Image"
+        alt="Una laptop con garabatos que aparentan código en la pantalla"
         class="object-cover w-full h-full"
         quality={"high"}
+        loading="eager"
+        decoding="async"
       />
       <div class="absolute inset-0 bg-black opacity-60"></div>
     </div>

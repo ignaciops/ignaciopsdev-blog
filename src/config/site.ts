@@ -9,6 +9,13 @@ export const siteConfig = {
     name: "Ignacio PS",
   },
 
+  // Social media
+  social: {
+    github: "https://github.com/ignaciops",
+    linkedin: "https://linkedin.com/in/ignaciops",
+    twitter: "https://x.com/ignaciopsdev",
+  },
+
   // SEO defaults
   defaultOgImage: "/images/og-default.png",
   locale: "es-MX",
