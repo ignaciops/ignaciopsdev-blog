@@ -1,0 +1,201 @@
+---
+title: 'Roadmap 2026. Test Architecture: 12 meses de aprendizaje continuo'
+date: 2026-01-05
+coverImage: >-
+  /images/posts/covers/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/coverImage.jpg
+coverImageAttribution: >-
+  Foto de <a
+  href="https://unsplash.com/es/@dkomow?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Daniil
+  Komov</a> en <a
+  href="https://unsplash.com/es/fotos/portatil-con-codigo-movil-gafas-y-peluche-rJkC2VsjKjQ?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+summary: >
+  Plan de 12 meses para aprender Test Architecture: desde fundamentos y
+  arquitectura hexagonal hasta chaos engineering, observability y security
+  testing
+tags:
+  - roadmap-2026
+  - sdet
+  - test-architecture
+  - arquitectura-de-pruebas
+  - aprendizaje
+featured: false
+---
+Desde que era adolescente me capturó todo lo relacionado con la tecnología. Pero no fue hasta hace algo más de tres años que empecé a trabajar en el área del desarrollo de software, más específicamente como Ingeniero de Aseguramiento de Calidad (QA Engineer).&#x20;
+
+Ya entrados en 2025, mis responsabilidades cambiaron. Ahora como SDET, me vi en la necesidad de seguir mejorando como desarrollador. Pasé de simplemente escribir scripts y código de automatización de pruebas, a crear software utilizado por otras personas que les ayuden en sus procesos.&#x20;
+
+Este cambio, implicó la necesidad de aprender más sobre las mejores prácticas al momento de escribir software y un cambio en el acercamiento que tengo antes de resolver un problema. Sin embargo, hay ciertas cosas que aún me faltaban: principios básicos que se obtienen con educación formal, maneras de trabajar y desarrollar software que implican ir más allá, como los principios de arquitectura de software.
+
+Y es que considero que un paso lógico es pasar del desarrollo de software a ser un arquitecto de las soluciones de software. Algo que aplica también al Aseguramiento de Calidad. No es solo decidir las formas de probar el software o cómo automatizar, sino también establecer patrones de arquitectura que hagan que todo el ecosistema de pruebas (Frameworks, reportes, pruebas, pipelines, observabilidad, CI/CD) sea mantenible, escalable y robusto.
+
+## ¿Por qué un roadmap específico de Test Architecture?
+
+Porque al querer reforzar el conocimiento que tengo, me di cuenta que necesitaba aprender arquitectura de software. También seguir aprendiendo de las tendencias en el área de aseguramiento de calidad. Y sobre todo, aprender ciertos aspectos de automatización de pruebas que aún no he tenido oportunidad de explorar, como contract testing, chaos engineering, observabilidad y security testing.
+
+## Test Architecture: El roadmap completo
+
+He dividido este plan de aprendizaje en 12 módulos mensuales, cada uno enfocado en un aspecto clave de arquitectura de pruebas:
+
+| Mes        | Tema                                    |
+| ---------- | --------------------------------------- |
+| Enero      | Foundations + Hexagonal Architecture    |
+| Febrero    | Architecture Refinement + Microservices |
+| Marzo      | Contract Testing                        |
+| Abril      | Observability                           |
+| Mayo       | Test Data Management                    |
+| Junio      | CI/CD Avanzado                          |
+| Julio      | Performance Testing                     |
+| Agosto     | Chaos Engineering                       |
+| Septiembre | Security Testing                        |
+| Octubre    | Accessibility Testing                   |
+| Noviembre  | Test Strategy & DORA Metrics            |
+| Diciembre  | Capstone Project                        |
+
+Cada mes incluye:&#x20;
+
+* Implementación práctica en el framework de testing
+* Blog post técnico documentando el aprendizaje (algunos meses habrá más)
+* Código en GitHub con ejemplos reales y funcionando
+* Lightning Talk en la comunidad (en meses seleccionados, dependiendo de disponibilidad)
+
+El roadmap completo con detalles de cada mes lo encuentras en el [repositorio de GitHub](https://github.com/ignaciops/test-architecture-learning)
+
+## Stack técnico
+
+Para este roadmap, he seleccionado herramientas que combinan popularidad en la industria con mi objetivo de aprendizaje:
+
+### Core del Framework:
+
+* **Python**. Mi lenguaje de desarrollo principal, me permite enfocarme en arquitectura sin distracciones de sintaxis
+* **Pytest**. El estándar para testing en Python, con un ecosistema de plugins robusto
+* **Playwright**. Herramienta moderna que apunta a convertirse en estándar para pruebas E2E, con excelente soporte de API testing.
+* **Allure**. Reportes visuales y detallados para facilitar el debugging
+* **Testcontainers**. Reproducibilidad de ambientes sin configuraciones manuales complejas
+* **Docker**. Portabilidad y consistencia entre ambientes de desarrollo y CI
+
+### Arquitectura del Framework:
+
+El Framework implementará **Arquitectura Hexagonal** (Puertos y Adaptadores). Esto implica separar la lógica de negocio de las herramientas específicas. En otras palabras: tener la capacidad de cambiar Playwright por otra herramienta sin reescribir los escenarios de prueba, solo cambiando el adaptador.
+
+Esta separación hace que el código sea más mantenible, testeable y preparado para cambios futuros.
+
+Por ejemplo: si mañana Playwright dejara de mantenerse, podríamos cambiar a Selenium u otra herramienta simplemente reescribiendo el \`browser\_adapter.py\` para la nueva herramienta, sin tocar ni un solo test o escenario.
+
+<Mermaid
+  code="flowchart TB
+subgraph TL[&#x22;TESTS&#x22;]
+TL_H[&#x22;Capa de Pruebas&#x22;]
+T[&#x22;`**test_home_page.py**
+Prueba: Página principal
+carga correctamente`&#x22;]
+end
+
+subgraph DL[&#x22;DOMAIN&#x22;]
+DL_H[&#x22;Lógica de Negocio&#x22;]
+S[&#x22;`**navigation_scenario.py**
+Escenario: Navegar a
+página principal
+Sin dependencias
+Solo usa interfaces`&#x22;]
+P[&#x22;`**browser_port.py**
+Puerto Interface
+navigate_to
+get_title
+is_element_visible`&#x22;]
+end
+
+subgraph AL[&#x22;ADAPTERS&#x22;]
+AL_H[&#x22;Implementaciones&#x22;]
+A[&#x22;`**playwright_adapter.py**
+Implementa browser_port
+usando Playwright`&#x22;]
+L[&#x22;`**home_locators.py**
+Locators centralizados`&#x22;]
+end
+
+subgraph ToolsL[&#x22;TOOLS&#x22;]
+TL_H2[&#x22;Herramientas&#x22;]
+PW[&#x22;`**Playwright**
+Automatización`&#x22;]
+end
+
+T --> S
+S --> P
+P -.-> A
+A --> L
+A --> PW
+
+style TL_H fill:none,stroke:none,color:#1976d2,font-weight:bold
+style DL_H fill:none,stroke:none,color:#0288d1,font-weight:bold
+style AL_H fill:none,stroke:none,color:#c2185b,font-weight:bold
+style TL_H2 fill:none,stroke:none,color:#388e3c,font-weight:bold
+
+style T fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+style S fill:#e1f5ff,stroke:#0288d1,stroke-width:2px
+style P fill:#fff4e1,stroke:#f57c00,stroke-width:2px
+style A fill:#ffe1f5,stroke:#c2185b,stroke-width:2px
+style L fill:#f0f0f0,stroke:#616161,stroke-width:2px
+style PW fill:#e8f5e9,stroke:#388e3c,stroke-width:2px"
+  caption="Figura 1. Arquitectura Hexagonal del Framework de pruebas."
+/>
+
+### Sistemas Bajo Prueba (SUTs):
+
+Durante el roadmap trabajaré con diferentes SUTs de complejidad creciente:
+
+* Este blog (Astro + Keystatic). Para pruebas E2E básicas y fundamentos&#x20;
+* Microservicios FastAPI. Crud básicos para pruebas de API y Contract Testing
+* Saleor E-commerce. Escenarios complejos con GraphQL
+* OWASP Juice Shop. Security Testing con una aplicación intencionalmente vulnerable
+
+<GalleryLightbox galleryCaption="Figura 2. Vista general del repositorio en GitHub, mostrando las metas mensuales, y SUTs." images={[{"src":"/images/posts/gallery/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/repo-readme-intro.webp","alt":"Screenshot del README del repositorio. Muestra objetivo y tabla de temas","caption":"Objetivo y Tabla de temas para Test Architecture Learning"},{"src":"/images/posts/gallery/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/repo-estructura-suts.webp","alt":"Screenshot de Estructura y Systems Under Test del repositorio","caption":"Estructura base y 4 SUTs del roadmap para Test Architecture"}]} />
+
+## Mi compromiso
+
+Durante todo el 2026, me he comprometido a hacer público este viaje de aprendizaje sobre Arquitectura de pruebas.
+
+Cada mes publicaré:
+
+* Código funcional en GitHub
+* Al menos un post técnico con tutoriales y reflexiones
+* Actualizaciones en el canal #accountability-buddies del Discord de Dgo TecHub (Si aún no estás en el server, ingresa en [este link](https://discord.gg/JgU4m4aqE5))
+* Snippets con información práctica en redes sociales.
+
+Durante el año habrá algunos eventos especiales:
+
+* **Enero 2026.** Lightning talk "Git Init. Una Guía de Control de Versiones para tu Crecimiento Personal" en pocas palabras: cómo cumplir tus propósitos tech este año.
+* **Julio 2026.** Retrospectiva pública de medio año y si es posible, una lightning talk técnica al respecto
+* **Diciembre 2026.** Cerraremos el año presentado el capstone project.
+
+Te invito a participar a lo largo de este proceso. ¿Cómo? Revisa el código y levanta Issues en GitHub si ves mejoras. Sugiere temas o herramientas que te gustaría que explore. Comparte el contenido si te es útil. Y si vives en Durango, únete al servidor de Discord de Dgo TecHub, participa con la comunidad y únete al canal #accountability-buddies si también estás en un viaje de aprendizaje.
+
+## Qué esperar del contenido de este roadmap
+
+Los posts de cada mes explicarán la teoría del módulo. Cómo se aplica en el framework y explicaciones paso a paso cuando sean necesarias para la implementación de los conceptos. También incluirán mis reflexiones, lo más honestas posibles, sobre el proceso de aprendizaje.\
+El código será funcional (mas no perfecto), disponible en GitHub con ejemplos reales.
+
+Errores… muchos errores cometidos, pero lo más importante: Las lecciones aprendidas.
+
+### Lo que NO será:
+
+* No es un curso estructurado con ejercicios guiados
+* Tampoco es documentación exhaustiva de cada herramienta (para eso están las documentaciones oficiales)
+* Contenido pulido y perfecto
+
+Pero sobre todo. Aunque estaré publicando de vez en cuando en redes sociales, **NO busco ser un influencer tech**.
+
+Este es un aprendizaje público, con tropiezos y todo. La prioridad será compartir el aprendizaje que obtenga sobre un contenido perfecto.
+
+## En resumen
+
+Durante 2026, seguiré dedicando tiempo a mi aprendizaje profesional, organizando mi tiempo libre para cumplir con este roadmap de aprendizaje con mis responsabilidades en la comunidad Dgo TecHub. Buscaré sentar las bases para tener fundamentos sólidos no solo de desarrollo de software en pruebas, sino también de arquitectura de pruebas.&#x20;
+
+Mi compromiso se enfocará en dos cosas: **primero**, aprender y aplicar el roadmap de Test Architecture de forma consistente; **segundo**, compartir ese conocimiento mediante posts, charlas en la comunidad y contenido en redes sociales.
+
+Si estás leyendo esto y alguno de los temas te interesa o llama la atención, te invito a:
+
+* Seguir el progreso en [GitHub](https://github.com/ignaciops/test-architecture-learning)
+* Conectar conmigo en [LinkedIn](https://linkedin.com/in/ignaciops) y [Twitter / X](https://x.com/ignaciopsdev)
+* Unirte al servidor de Discord de [Dgo TecHub](https://discord.gg/JgU4m4aqE5) para conectar con otros apasionados de la tecnología, y por qué no, tener discusiones sobre lo aprendido.
+
+Nos vemos durante todo 2026!
