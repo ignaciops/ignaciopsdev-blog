@@ -37,11 +37,5 @@ export default defineConfig({
     }
   },
 
-  integrations: [react(), mdx({
-    components: {
-      KeystaticImage: '~/components/mdx/KeystaticImage.astro',
-      YouTube: '~/components/mdx/YouTube.astro',
-      Callout: '~/components/mdx/Callout.astro',
-    },
-  }), keystatic()]
+  integrations: [react(), mdx(), keystatic()]
 });

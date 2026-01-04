@@ -232,6 +232,21 @@ export default config({
                         }
                     )
                 }
+            }),
+            Mermaid: block({
+                label: 'Diagrama Mermaid',
+                schema: {
+                    code: fields.text({
+                        label: 'Código del Diagrama',
+                        description: 'Código Mermaid para generar el diagrama (ej: graph TD; A-->B)',
+                        multiline: true,
+                        validation: { isRequired: true }
+                    }),
+                    caption: fields.text({
+                        label: 'Descripción (opcional)',
+                        description: 'Texto que aparece debajo del diagrama (ej: "Figura 1. Flujo de autenticación")'
+                    })
+                }
             })
           }
         }),
@@ -400,6 +415,21 @@ export default config({
                             itemLabel: props => props.fields.alt.value || 'Nueva imagen'
                         }
                     )
+                }
+            }),
+            Mermaid: block({
+                label: 'Diagrama Mermaid',
+                schema: {
+                    code: fields.text({
+                        label: 'Código del Diagrama',
+                        description: 'Código Mermaid para generar el diagrama (ej: graph TD; A-->B)',
+                        multiline: true,
+                        validation: { isRequired: true }
+                    }),
+                    caption: fields.text({
+                        label: 'Descripción (opcional)',
+                        description: 'Texto que aparece debajo del diagrama (ej: "Figura 1. Flujo de autenticación")'
+                    })
                 }
             })
           }

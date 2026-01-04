@@ -1,0 +1,131 @@
+---
+export interface Props {
+  code: string; // El código del diagrama Mermaid
+  caption?: string; // Descripción opcional del diagrama
+}
+
+const { code, caption } = Astro.props;
+// Generamos un ID único para este diagrama
+const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div class="my-8">
+  <!-- Contenedor del diagrama con skeleton loader -->
+  <div
+    class="mermaid-container rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 overflow-x-auto"
+  >
+    <!-- Skeleton loader mientras carga -->
+    <div
+      id={`${diagramId}-skeleton`}
+      class="skeleton-loader flex items-center justify-center min-h-[200px] bg-gray-100 dark:bg-gray-800 rounded animate-pulse"
+    >
+      <span class="text-gray-500 dark:text-gray-400 text-sm">Cargando diagrama...</span>
+    </div>
+
+    <!-- El diagrama se renderizará aquí -->
+    <div
+      id={diagramId}
+      class="mermaid hidden"
+      data-mermaid-code={code}
+    >
+      {code}
+    </div>
+  </div>
+
+  <!-- Caption opcional -->
+  {caption && (
+    <p class="mt-3 text-sm text-center text-gray-600 dark:text-gray-400 italic">
+      {caption}
+    </p>
+  )}
+</div>
+
+<script>
+  // Este script se ejecuta una sola vez cuando se carga la página
+  import mermaid from 'mermaid';
+
+  // Configuración de Mermaid
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'default',
+    securityLevel: 'loose',
+    fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+  });
+
+  // Función para renderizar diagramas
+  async function renderDiagrams() {
+    const diagrams = document.querySelectorAll('.mermaid');
+
+    for (const diagram of diagrams) {
+      const diagramId = diagram.id;
+      const skeletonId = `${diagramId}-skeleton`;
+      const skeleton = document.getElementById(skeletonId);
+
+      try {
+        // Renderizar el diagrama
+        const { svg } = await mermaid.render(
+          `${diagramId}-svg`,
+          diagram.textContent || ''
+        );
+
+        // Reemplazar el contenido con el SVG generado
+        diagram.innerHTML = svg;
+        diagram.classList.remove('hidden');
+
+        // Ocultar el skeleton loader
+        if (skeleton) {
+          skeleton.classList.add('hidden');
+        }
+      } catch (error) {
+        console.error('Error rendering Mermaid diagram:', error);
+
+        // Mostrar mensaje de error
+        if (skeleton) {
+          skeleton.innerHTML = `
+            <div class="text-red-600 dark:text-red-400 text-sm">
+              <p class="font-semibold">Error al renderizar diagrama</p>
+              <p class="mt-1">${error instanceof Error ? error.message : 'Error desconocido'}</p>
+            </div>
+          `;
+          skeleton.classList.remove('animate-pulse', 'bg-gray-100', 'dark:bg-gray-800');
+        }
+      }
+    }
+  }
+
+  // Renderizar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderDiagrams);
+  } else {
+    renderDiagrams();
+  }
+</script>
+
+<style>
+  /* Estilos para el contenedor del diagrama */
+  .mermaid-container {
+    transition: all 0.3s ease;
+  }
+
+  /* Asegurar que los SVGs de Mermaid se vean bien */
+  .mermaid svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Animación del skeleton */
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+</style>

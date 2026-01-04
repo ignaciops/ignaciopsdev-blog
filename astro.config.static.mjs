@@ -24,11 +24,5 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
 
-  integrations: [react(), mdx({
-    components: {
-      KeystaticImage: '~/components/mdx/KeystaticImage.astro',
-      YouTube: '~/components/mdx/YouTube.astro',
-      Callout: '~/components/mdx/Callout.astro',
-    },
-  })],
+  integrations: [react(), mdx()],
 });

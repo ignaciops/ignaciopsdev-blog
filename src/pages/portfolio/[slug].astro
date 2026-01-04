@@ -6,6 +6,7 @@ import KeystaticImage from '../../components/mdx/KeystaticImage.astro';
 import Callout from '../../components/mdx/Callout.astro';
 import GalleryGrid from '../../components/mdx/KeystaticGalleryGrid.astro';
 import GalleryLightbox from '../../components/mdx/KeystaticGalleryLightbox.astro';
+import Mermaid from '../../components/mdx/Mermaid.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('portfolio');
@@ -77,6 +78,6 @@ const projectFrontmatter = {
     </div>
 
     <!-- Contenido MDX (Descripción larga del proyecto) -->
-    <Content components={{ YouTube, KeystaticImage, Callout, GalleryGrid, GalleryLightbox }} />
+    <Content components={{ YouTube, KeystaticImage, Callout, GalleryGrid, GalleryLightbox, Mermaid }} />
 
 </PostLayout>
