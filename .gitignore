@@ -30,3 +30,7 @@ pnpm-debug.log*
 # Docker
 logs/
 *.log
+
+# Image optimization temp folders
+public/images/posts/gallery-temp/
+public/images/portfolio/gallery-temp/

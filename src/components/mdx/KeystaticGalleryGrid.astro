@@ -1,0 +1,29 @@
+---
+/**
+ * Wrapper MDX para GalleryGrid - Para usar en Keystatic
+ * Recibe un array de objetos con rutas públicas de imágenes optimizadas
+ */
+
+interface GalleryImage {
+  src: string; // Ruta pública, ej: /images/posts/gallery/imagen.webp
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  images: GalleryImage[];
+}
+
+const { images } = Astro.props;
+---
+
+<div data-testid="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-8">
+  {images.map((image, index) => (
+    <div data-testid={`gallery-item-${index}`} class="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+      <img src={image.src} alt={image.alt} class="w-full h-auto" loading="lazy" />
+      {image.caption && (
+        <p class="p-4 text-sm text-gray-600 dark:text-gray-400">{image.caption}</p>
+      )}
+    </div>
+  ))}
+</div>

@@ -172,6 +172,66 @@ export default config({
                         multiline: true
                     })
                 }
+            }),
+            GalleryGrid: block({
+                label: 'Galería de Imágenes (Grid)',
+                schema: {
+                    images: fields.array(
+                        fields.object({
+                            src: fields.image({
+                                label: 'Imagen',
+                                description: 'Usa imágenes optimizadas desde /images/posts/gallery/',
+                                directory: 'public/images/posts/gallery',
+                                publicPath: '/images/posts/gallery/'
+                            }),
+                            alt: fields.text({
+                                label: 'Texto alternativo',
+                                description: 'Describe la imagen para accesibilidad',
+                                validation: { isRequired: true }
+                            }),
+                            caption: fields.text({
+                                label: 'Descripción (opcional)',
+                                description: 'Texto que aparece debajo de la imagen'
+                            })
+                        }),
+                        {
+                            label: 'Imágenes',
+                            itemLabel: props => props.fields.alt.value || 'Nueva imagen'
+                        }
+                    )
+                }
+            }),
+            GalleryLightbox: block({
+                label: 'Galería con Lightbox',
+                schema: {
+                    galleryCaption: fields.text({
+                        label: 'Caption de la Galería (Opcional)',
+                        description: 'Texto que aparece debajo de toda la galería (ej: "Figura 2. Vista del repositorio")'
+                    }),
+                    images: fields.array(
+                        fields.object({
+                            src: fields.image({
+                                label: 'Imagen',
+                                description: 'Usa imágenes optimizadas desde /images/posts/gallery/',
+                                directory: 'public/images/posts/gallery',
+                                publicPath: '/images/posts/gallery/'
+                            }),
+                            alt: fields.text({
+                                label: 'Texto alternativo',
+                                description: 'Describe la imagen para accesibilidad',
+                                validation: { isRequired: true }
+                            }),
+                            caption: fields.text({
+                                label: 'Descripción (opcional)',
+                                description: 'Texto que aparece debajo de la imagen'
+                            })
+                        }),
+                        {
+                            label: 'Imágenes',
+                            itemLabel: props => props.fields.alt.value || 'Nueva imagen'
+                        }
+                    )
+                }
             })
           }
         }),
@@ -280,6 +340,66 @@ export default config({
                         label: 'Contenido',
                         multiline: true
                     })
+                }
+            }),
+            GalleryGrid: block({
+                label: 'Galería de Imágenes (Grid)',
+                schema: {
+                    images: fields.array(
+                        fields.object({
+                            src: fields.image({
+                                label: 'Imagen',
+                                description: 'Usa imágenes optimizadas desde /images/portfolio/gallery/',
+                                directory: 'public/images/portfolio/gallery',
+                                publicPath: '/images/portfolio/gallery/'
+                            }),
+                            alt: fields.text({
+                                label: 'Texto alternativo',
+                                description: 'Describe la imagen para accesibilidad',
+                                validation: { isRequired: true }
+                            }),
+                            caption: fields.text({
+                                label: 'Descripción (opcional)',
+                                description: 'Texto que aparece debajo de la imagen'
+                            })
+                        }),
+                        {
+                            label: 'Imágenes',
+                            itemLabel: props => props.fields.alt.value || 'Nueva imagen'
+                        }
+                    )
+                }
+            }),
+            GalleryLightbox: block({
+                label: 'Galería con Lightbox',
+                schema: {
+                    galleryCaption: fields.text({
+                        label: 'Caption de la Galería (Opcional)',
+                        description: 'Texto que aparece debajo de toda la galería (ej: "Figura 2. Vista del repositorio")'
+                    }),
+                    images: fields.array(
+                        fields.object({
+                            src: fields.image({
+                                label: 'Imagen',
+                                description: 'Usa imágenes optimizadas desde /images/portfolio/gallery/',
+                                directory: 'public/images/portfolio/gallery',
+                                publicPath: '/images/portfolio/gallery/'
+                            }),
+                            alt: fields.text({
+                                label: 'Texto alternativo',
+                                description: 'Describe la imagen para accesibilidad',
+                                validation: { isRequired: true }
+                            }),
+                            caption: fields.text({
+                                label: 'Descripción (opcional)',
+                                description: 'Texto que aparece debajo de la imagen'
+                            })
+                        }),
+                        {
+                            label: 'Imágenes',
+                            itemLabel: props => props.fields.alt.value || 'Nueva imagen'
+                        }
+                    )
                 }
             })
           }

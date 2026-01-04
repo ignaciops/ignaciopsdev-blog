@@ -8,7 +8,9 @@
     "build": "astro build --config astro.config.static.mjs",
     "preview": "astro preview --config astro.config.static.mjs",
     "deploy": "npm run build && rsync -avz --delete dist/ nc2:~/containers/caddy/container-data/www/ignaciops.dev/",
-    "astro": "astro"
+    "astro": "astro",
+    "optimize:gallery": "npx sharp-cli -i 'public/images/posts/gallery-temp/*.{jpg,jpeg,png}' -o public/images/posts/gallery -f webp -q 85 --progressive",
+    "optimize:portfolio-gallery": "npx sharp-cli -i 'public/images/portfolio/gallery-temp/*.{jpg,jpeg,png}' -o public/images/portfolio/gallery -f webp -q 85 --progressive"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.12",
@@ -31,6 +33,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "@types/basiclightbox": "^5.0.4"
+    "@types/basiclightbox": "^5.0.4",
+    "sharp-cli": "^5.2.0"
   }
 }

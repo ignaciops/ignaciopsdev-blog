@@ -1,0 +1,161 @@
+---
+/**
+ * Wrapper MDX para GalleryLightbox - Para usar en Keystatic
+ * Recibe un array de objetos con rutas públicas de imágenes optimizadas
+ * Incluye funcionalidad de lightbox al hacer click
+ */
+
+interface GalleryImage {
+  src: string; // Ruta pública, ej: /images/posts/gallery/imagen.webp
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  images: GalleryImage[];
+  galleryCaption?: string; // Caption general para toda la galería
+}
+
+const { images, galleryCaption } = Astro.props;
+
+// Generar ID único para esta galería
+const galleryId = `gallery-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<figure class="my-8">
+  <div data-testid="gallery-lightbox" class={`gallery-lightbox ${galleryId} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4`}>
+  {images.map((image, index) => (
+    <div
+      data-testid={`gallery-lightbox-item-${index}`}
+      class="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+      data-image-src={image.src}
+      data-image-alt={image.alt}
+    >
+      <img src={image.src} alt={image.alt} class="w-full h-auto" loading="lazy" />
+      {image.caption && (
+        <p class="p-4 text-sm text-gray-600 dark:text-gray-400">{image.caption}</p>
+      )}
+    </div>
+  ))}
+  </div>
+  {galleryCaption && (
+    <figcaption class="text-center text-sm text-gray-600 dark:text-gray-400 mt-4 italic">
+      {galleryCaption}
+    </figcaption>
+  )}
+</figure>
+
+<script>
+import * as basicLightbox from 'basiclightbox';
+import 'basiclightbox/dist/basicLightbox.min.css';
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Buscar todas las galerías lightbox en la página
+  const galleries = document.querySelectorAll('.gallery-lightbox');
+
+  galleries.forEach((gallery) => {
+    // Generar ID único para esta galería
+    const galleryId = `gallery-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Obtener todas las imágenes de esta galería
+    const galleryItems = Array.from(gallery.querySelectorAll('div[data-testid^="gallery-lightbox-item"]'));
+    const images = galleryItems.map(item => item.querySelector('img')).filter(img => img !== null);
+
+    let currentIndex = 0;
+    let lightboxInstance: any = null;
+
+    // Función para crear el contenido del lightbox
+    const createLightboxContent = (index: number) => {
+      const img = images[index];
+      const showNav = images.length > 1;
+
+      return `
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+          <img src="${img.src}" alt="${img.alt}" style="max-width: 90vw; max-height: 90vh; object-fit: contain;">
+          ${showNav ? `
+            <button
+              id="lightbox-prev-${galleryId}"
+              class="lightbox-prev"
+              style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;"
+              onmouseover="this.style.background='rgba(0,0,0,0.8)'"
+              onmouseout="this.style.background='rgba(0,0,0,0.5)'"
+            >‹</button>
+            <button
+              id="lightbox-next-${galleryId}"
+              class="lightbox-next"
+              style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;"
+              onmouseover="this.style.background='rgba(0,0,0,0.8)'"
+              onmouseout="this.style.background='rgba(0,0,0,0.5)'"
+            >›</button>
+            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 8px 16px; border-radius: 20px; font-size: 14px;">
+              ${index + 1} / ${images.length}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    };
+
+    // Función para manejar navegación con teclado
+    const handleKeyboard = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+        showImage(newIndex);
+      } else if (e.key === 'ArrowRight') {
+        const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+        showImage(newIndex);
+      }
+    };
+
+    // Handler para clicks en botones de navegación
+    const handleNavigationClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+
+      if (target.id === `lightbox-prev-${galleryId}` || target.classList.contains('lightbox-prev')) {
+        e.stopPropagation();
+        const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+        showImage(newIndex);
+      } else if (target.id === `lightbox-next-${galleryId}` || target.classList.contains('lightbox-next')) {
+        e.stopPropagation();
+        const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+        showImage(newIndex);
+      }
+    };
+
+    // Función para mostrar imagen en el índice especificado
+    const showImage = (index: number) => {
+      currentIndex = index;
+      if (lightboxInstance) {
+        lightboxInstance.close();
+      }
+
+      lightboxInstance = basicLightbox.create(createLightboxContent(currentIndex), {
+        onShow: (instance: any) => {
+          // Usar delegación de eventos en el contenedor del lightbox
+          instance.element().addEventListener('click', handleNavigationClick);
+          document.addEventListener('keydown', handleKeyboard);
+          return true;
+        },
+        onClose: () => {
+          // Limpiar event listeners
+          document.removeEventListener('keydown', handleKeyboard);
+          return true;
+        }
+      });
+      lightboxInstance.show();
+    };
+
+    // Event listener para clicks en las imágenes de la galería
+    gallery.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const clickedItem = target.closest('div[data-testid^="gallery-lightbox-item"]');
+
+      if (clickedItem) {
+        const index = galleryItems.indexOf(clickedItem);
+        if (index !== -1) {
+          showImage(index);
+        }
+      }
+    });
+  });
+});
+</script>

@@ -5,6 +5,8 @@ import PostLayout from '../../layouts/PostLayout.astro';
 import KeystaticImage from '../../components/mdx/KeystaticImage.astro';
 import YouTube from '../../components/mdx/YouTube.astro';
 import Callout from '../../components/mdx/Callout.astro';
+import GalleryGrid from '../../components/mdx/KeystaticGalleryGrid.astro';
+import GalleryLightbox from '../../components/mdx/KeystaticGalleryLightbox.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -41,5 +43,5 @@ const { Content, headings } = await post.render();
   prev={prev}
   next={next}
 >
-  <Content components={{ YouTube, KeystaticImage, Callout }} />
+  <Content components={{ YouTube, KeystaticImage, Callout, GalleryGrid, GalleryLightbox }} />
 </PostLayout>

@@ -3,6 +3,9 @@ import { getCollection, getEntry } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import YouTube from '../../components/mdx/YouTube.astro';
 import KeystaticImage from '../../components/mdx/KeystaticImage.astro';
+import Callout from '../../components/mdx/Callout.astro';
+import GalleryGrid from '../../components/mdx/KeystaticGalleryGrid.astro';
+import GalleryLightbox from '../../components/mdx/KeystaticGalleryLightbox.astro';
 
 export async function getStaticPaths() {
   const projects = await getCollection('portfolio');
@@ -74,6 +77,6 @@ const projectFrontmatter = {
     </div>
 
     <!-- Contenido MDX (Descripción larga del proyecto) -->
-    <Content components={{ YouTube, KeystaticImage }} />
+    <Content components={{ YouTube, KeystaticImage, Callout, GalleryGrid, GalleryLightbox }} />
 
 </PostLayout>
