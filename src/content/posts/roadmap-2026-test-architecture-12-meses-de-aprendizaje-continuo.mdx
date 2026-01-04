@@ -1,6 +1,6 @@
 ---
 title: 'Roadmap 2026. Test Architecture: 12 meses de aprendizaje continuo'
-date: 2026-01-05
+date: 2026-01-04
 coverImage: >-
   /images/posts/covers/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/coverImage.jpg
 coverImageAttribution: >-
@@ -18,7 +18,7 @@ tags:
   - test-architecture
   - arquitectura-de-pruebas
   - aprendizaje
-featured: false
+featured: true
 ---
 Desde que era adolescente me capturó todo lo relacionado con la tecnología. Pero no fue hasta hace algo más de tres años que empecé a trabajar en el área del desarrollo de software, más específicamente como Ingeniero de Aseguramiento de Calidad (QA Engineer).&#x20;
 
@@ -139,6 +139,96 @@ style PW fill:#e8f5e9,stroke:#388e3c,stroke-width:2px"
   caption="Figura 1. Arquitectura Hexagonal del Framework de pruebas."
 />
 
+#### Flujo de Ejecución&#x20;
+
+El diagrama anterior muestra **cómo fluyen las llamadas** cuando ejecutamos una prueba:
+
+1. Los **Tests** invocan **Scenarios** (lógica de negocio)
+2. Los **Scenarios** usan **Ports** (interfaces que definen capacidades)
+3. Los **Ports** son implementados por **Adapters** (código específico de herramientas)
+4. Los **Adapters** controlan los **Tools** (Playwright, HTTPX, etc.)
+
+Este es el **flujo de ejecución**: el camino que sigue el código cuando corre.
+
+#### Arquitectura de Dependencias&#x20;
+
+Pero la arquitectura hexagonal se trata de **quién depende de quién**:
+
+<Mermaid
+  code="graph TB
+subgraph DC[&#x22;DOMAIN CORE (Independiente)&#x22;]
+S[&#x22;Scenarios
+Lógica de negocio
+Orquesta las pruebas&#x22;]
+P[&#x22;Ports
+Interfaces/Contratos
+Define capacidades&#x22;]
+
+S -->|usa| P
+end
+
+subgraph AD[&#x22;ADAPTERS (Implementaciones)&#x22;]
+A1[&#x22;UI Adapter
+playwright_adapter.py&#x22;]
+A2[&#x22;API Adapter
+httpx_adapter.py&#x22;]
+A3[&#x22;DB Adapter
+testcontainers_adapter.py&#x22;]
+end
+
+subgraph TL[&#x22;TOOLS (Herramientas)&#x22;]
+T1[&#x22;Playwright&#x22;]
+T2[&#x22;HTTPX&#x22;]
+T3[&#x22;Testcontainers&#x22;]
+end
+
+P -.->|&#x22;implementado por&#x22;| A1
+P -.->|&#x22;implementado por&#x22;| A2
+P -.->|&#x22;implementado por&#x22;| A3
+
+A1 -->|controla| T1
+A2 -->|controla| T2
+A3 -->|controla| T3
+
+style DC fill:#e1f5ff,stroke:#0288d1,stroke-width:3px
+style AD fill:#ffe1f5,stroke:#c2185b,stroke-width:2px
+style TL fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+
+style S fill:#fff4e1,stroke:#f57c00,stroke-width:2px
+style P fill:#fff4e1,stroke:#f57c00,stroke-width:2px
+
+style A1 fill:#ffe1f5,stroke:#c2185b,stroke-width:2px
+style A2 fill:#ffe1f5,stroke:#c2185b,stroke-width:2px
+style A3 fill:#ffe1f5,stroke:#c2185b,stroke-width:2px
+
+style T1 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+style T2 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+style T3 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px"
+  caption="Figura 2. Arquitectura Hexagonal - dirección de dependencias"
+/>
+
+La clave está en la dirección de las flechas:&#x20;
+
+* **Flechas sólidas (→)**: Flujo de uso/llamadas&#x20;
+* **Flechas punteadas (-.->)**: Relación de implementación&#x20;
+
+El **Domain Core** (Scenarios + Ports) es el centro y está completamente aislado de las herramientas:&#x20;
+
+1. Los **Scenarios** definen QUÉ hacer (lógica de negocio)&#x20;
+2. Los **Ports** definen QUÉ capacidades se necesitan (interfaces)&#x20;
+3. Los **Adapters** definen CÓMO hacerlo (implementaciones concretas)&#x20;
+4. Los **Tools** son las herramientas específicas que usamos&#x20;
+
+**Nota importante**: Las flechas punteadas van de Ports → Adapters, indicando que los Adapters "implementan" los Ports. El Domain nunca conoce ni depende de Playwright, HTTPX o Testcontainers.&#x20;
+
+**Beneficio práctico**:&#x20;
+
+* Cambiar Playwright por Selenium = crear nuevo UI Adapter&#x20;
+* Cambiar HTTPX por Requests = crear nuevo API Adapter&#x20;
+* Cambiar Testcontainers por Docker directo = crear nuevo DB Adapter&#x20;
+
+En ningún caso tocamos Scenarios ni Ports. El Domain permanece intacto.
+
 ### Sistemas Bajo Prueba (SUTs):
 
 Durante el roadmap trabajaré con diferentes SUTs de complejidad creciente:
@@ -148,7 +238,7 @@ Durante el roadmap trabajaré con diferentes SUTs de complejidad creciente:
 * Saleor E-commerce. Escenarios complejos con GraphQL
 * OWASP Juice Shop. Security Testing con una aplicación intencionalmente vulnerable
 
-<GalleryLightbox galleryCaption="Figura 2. Vista general del repositorio en GitHub, mostrando las metas mensuales, y SUTs." images={[{"src":"/images/posts/gallery/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/repo-readme-intro.webp","alt":"Screenshot del README del repositorio. Muestra objetivo y tabla de temas","caption":"Objetivo y Tabla de temas para Test Architecture Learning"},{"src":"/images/posts/gallery/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/repo-estructura-suts.webp","alt":"Screenshot de Estructura y Systems Under Test del repositorio","caption":"Estructura base y 4 SUTs del roadmap para Test Architecture"}]} />
+<GalleryLightbox galleryCaption="Figura 3. Vista general del repositorio en GitHub, mostrando las metas mensuales, y SUTs." images={[{"src":"/images/posts/gallery/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/repo-readme-intro.webp","alt":"Screenshot del README del repositorio. Muestra objetivo y tabla de temas","caption":"Objetivo y Tabla de temas para Test Architecture Learning"},{"src":"/images/posts/gallery/roadmap-2026-test-architecture-12-meses-de-aprendizaje-continuo/repo-estructura-suts.webp","alt":"Screenshot de Estructura y Systems Under Test del repositorio","caption":"Estructura base y 4 SUTs del roadmap para Test Architecture"}]} />
 
 ## Mi compromiso
 
