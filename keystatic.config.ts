@@ -66,7 +66,7 @@ export default config({
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Título' } }),
-        date: fields.date({ label: 'Fecha', validation: { isRequired: true } }),
+        date: fields.datetime({ label: 'Fecha', includeTime: true, validation: { isRequired: true } }),
 
         // Featured image for post header & social sharing
         coverImage: fields.image({
@@ -277,7 +277,7 @@ export default config({
         description: fields.text({ label: 'Descripción Breve' }),
 
         // Project date
-        projectDate: fields.date({
+        projectDate: fields.datetime({
           label: 'Fecha del Proyecto',
           description: 'Fecha de finalización o última actualización significativa',
           validation: { isRequired: true }

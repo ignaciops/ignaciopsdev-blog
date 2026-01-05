@@ -5,11 +5,11 @@
 
 export type DateFormat = 'short' | 'long' | 'numeric' | 'iso';
 
-export function formatDate(date: Date, format: DateFormat = 'short', locale: string = 'es-ES'): string {
+export function formatDate(date: Date, format: DateFormat = 'short', locale: string = 'es-MX'): string {
   const formats: Record<DateFormat, Intl.DateTimeFormatOptions | 'iso'> = {
-    short: { month: 'short', day: 'numeric', year: 'numeric' },
-    long: { year: 'numeric', month: 'long', day: 'numeric' },
-    numeric: { year: 'numeric', month: '2-digit', day: '2-digit' },
+    short: { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Monterrey' },
+    long: { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Monterrey' },
+    numeric: { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'America/Monterrey' },
     iso: 'iso'
   };
 
