@@ -18,7 +18,7 @@ interface Props {
 const { title, description, buttons, backgroundImage } = Astro.props;
 ---
 
-<section data-testid="hero-section" class="relative w-full overflow-hidden -mt-[88px]" style="min-height: calc(60vh + 88px);">
+<section data-testid="hero-section" class="relative w-full overflow-hidden -mt-[88px] min-h-[calc(30vh+88px)] md:min-h-[calc(50vh+88px)] lg:min-h-[calc(70vh+88px)]">
   {backgroundImage && (
     <div class="absolute inset-0 z-0">
       <Image
@@ -33,14 +33,14 @@ const { title, description, buttons, backgroundImage } = Astro.props;
       <div class="absolute inset-0 bg-black opacity-60"></div>
     </div>
   )}
-  <div class="relative z-10 w-full max-w-5xl mx-auto px-4 pt-32 md:pt-40 pb-16 md:pb-24 min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex flex-col justify-center">
+  <div class="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-32 sm:pt-40 md:pt-48 pb-12 sm:pb-16 md:pb-24 min-h-[30vh] md:min-h-[50vh] lg:min-h-[70vh] flex flex-col justify-center">
     {title && (
-        <h1 data-testid="hero-title" class="font-sans font-extrabold text-5xl md:text-6xl lg:text-7xl text-white mb-6 drop-shadow-lg">
+        <h1 data-testid="hero-title" class="font-sans font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 drop-shadow-lg">
             {title}
         </h1>
     )}
     {description && (
-        <p data-testid="hero-description" class="text-xl md:text-2xl lg:text-3xl text-gray-200 leading-relaxed max-w-3xl mb-8 drop-shadow-md text-center">
+        <p data-testid="hero-description" class="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-200 leading-relaxed max-w-3xl mb-8 drop-shadow-md text-center">
             {description}
         </p>
     )}
