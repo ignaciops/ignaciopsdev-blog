@@ -126,6 +126,10 @@ const isActive = (href: string) => {
     const menuIconClose = document.getElementById("menu-icon-close");
     const themeToggles = document.querySelectorAll("[id^='theme-toggle']");
 
+    // Evitar inicialización duplicada en el mismo elemento
+    if (mobileMenuToggle?.dataset.initialized === "true") return;
+    if (mobileMenuToggle) mobileMenuToggle.dataset.initialized = "true";
+
     const toggleMenu = () => {
       const isExpanded = mobileMenuToggle?.getAttribute("aria-expanded") === "true";
       mobileMenuToggle?.setAttribute("aria-expanded", (!isExpanded).toString());
@@ -141,7 +145,7 @@ const isActive = (href: string) => {
       mobileMenuToggle?.setAttribute("aria-expanded", "false");
     };
 
-    // Listeners principales
+    // Listener para el botón hamburguesa
     mobileMenuToggle?.addEventListener("click", (e) => {
       e.stopPropagation();
       toggleMenu();
@@ -149,6 +153,8 @@ const isActive = (href: string) => {
 
     // Theme Toggles
     themeToggles.forEach(btn => {
+      if (btn.dataset.themeInitialized === "true") return;
+      btn.dataset.themeInitialized = "true";
       btn.addEventListener("click", () => {
         document.documentElement.classList.toggle("dark");
         const isDark = document.documentElement.classList.contains("dark");
@@ -156,18 +162,22 @@ const isActive = (href: string) => {
       });
     });
 
-    // Cerrar al hacer clic fuera
-    document.addEventListener("click", (e) => {
+    // Cerrar al hacer clic fuera (usar una función nombrada para evitar duplicados)
+    const handleClickOutside = (e: MouseEvent) => {
       if (!mobileMenu?.contains(e.target as Node) && !mobileMenuToggle?.contains(e.target as Node)) {
         closeMenu();
       }
-    });
+    };
 
-    // Cerrar antes de cambiar de página para que no aparezca abierto en la siguiente
-    document.addEventListener("astro:before-preparation", closeMenu);
+    // Remover listener anterior si existe y añadir nuevo
+    document.removeEventListener("click", (window as any).__headerClickOutside);
+    (window as any).__headerClickOutside = handleClickOutside;
+    document.addEventListener("click", handleClickOutside);
+
+    // Cerrar antes de cambiar de página
+    document.addEventListener("astro:before-preparation", closeMenu, { once: true });
   }
 
-  // Inicialización para Astro 5
-  initHeader();
+  // astro:page-load se dispara tanto en carga inicial como en navegaciones con View Transitions
   document.addEventListener("astro:page-load", initHeader);
 </script>
