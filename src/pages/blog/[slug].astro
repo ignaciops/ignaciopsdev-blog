@@ -8,6 +8,7 @@ import Callout from '../../components/mdx/Callout.astro';
 import GalleryGrid from '../../components/mdx/KeystaticGalleryGrid.astro';
 import GalleryLightbox from '../../components/mdx/KeystaticGalleryLightbox.astro';
 import Mermaid from '../../components/mdx/Mermaid.astro';
+import ExternalLink from '../../components/mdx/ExternalLink.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
@@ -44,5 +45,5 @@ const { Content, headings } = await post.render();
   prev={prev}
   next={next}
 >
-  <Content components={{ YouTube, KeystaticImage, Callout, GalleryGrid, GalleryLightbox, Mermaid }} />
+  <Content components={{ YouTube, KeystaticImage, Callout, GalleryGrid, GalleryLightbox, Mermaid, a: ExternalLink }} />
 </PostLayout>

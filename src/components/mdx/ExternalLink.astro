@@ -1,0 +1,21 @@
+---
+// src/components/mdx/ExternalLink.astro
+// Componente para abrir links externos en nueva pestaña
+
+interface Props {
+  href?: string;
+  [key: string]: any;
+}
+
+const { href, ...rest } = Astro.props;
+
+// Determinar si es un link externo
+const isExternal = href && (href.startsWith('http://') || href.startsWith('https://'));
+
+// Atributos para links externos
+const externalAttrs = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+---
+
+<a href={href} {...externalAttrs} {...rest}>
+  <slot />
+</a>
