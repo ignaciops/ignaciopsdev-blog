@@ -16,6 +16,7 @@
     "@astrojs/mdx": "^4.3.12",
     "@astrojs/node": "^9.5.1",
     "@astrojs/react": "^4.4.2",
+    "@astrojs/rss": "^4.0.15",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/merriweather": "^5.2.11",

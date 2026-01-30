@@ -15,6 +15,7 @@ import node from '@astrojs/node';
 // Use: npm run dev (for editing content via Keystatic)
 // For production build, use: npm run build (uses astro.config.static.mjs)
 export default defineConfig({
+  site: 'https://ignaciops.dev',
   output: 'server',
   adapter: node({
     mode: 'standalone'
