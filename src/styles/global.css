@@ -15,17 +15,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Fix for code blocks - remove alternating line backgrounds */
-.prose pre code span.line,
-.prose pre code .line {
-    background-color: transparent !important;
-}
-
-.prose pre code span[style*="background-color"],
-.prose pre code .line[style*="background-color"] {
-    background-color: transparent !important;
-}
-
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

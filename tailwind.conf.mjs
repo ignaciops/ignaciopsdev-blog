@@ -64,7 +64,7 @@ export default {
 							color: theme('colors.gray.100'),
 						},
 						'code': {
-							backgroundColor: theme('colors.gray.800'),
+							// backgroundColor: theme('colors.gray.800'),
 							color: theme('colors.gray.200'),
 						}
 					},
