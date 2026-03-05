@@ -1,0 +1,232 @@
+---
+title: 'API Testing con Arquitectura Hexagonal: los mismos principios, una nueva capa'
+date: 2026-03-04T22:33:00.000Z
+coverImage: >-
+  /images/posts/covers/api-testing-con-arquitectura-hexagonal-los-mismos-principios-una-nueva-capa/coverImage.png
+coverImageAttribution: Diagrama de arquitectura generado por Gemini 3 Flash de Google
+summary: >-
+  Febrero fue un mes incompleto, pero los cimientos están. Cómo los principios
+  de arquitectura hexagonal que apliqué en enero escalan naturalmente al API
+  testing.
+metaDescription: >-
+  Aplicando arquitectura hexagonal a API testing con HTTPX y pytest: ports,
+  adapters, scenarios de negocio y manejo de estado en el SUT.
+tags:
+  - roadmap-2026
+  - arquitectura-de-pruebas
+  - api-testing
+  - httpx
+  - arquitectura-hexagonal
+featured: true
+---
+> Este post corresponde al segundo módulo del roadmap: API Testing Automation. Febrero fue un mes con muchos contratiempos personales y laborales. Asumo la responsabilidad de no poder cumplir con todos los objetivos planeados para el mes.&#x20;
+
+---
+
+En enero, la idea general del proyecto fue: ¿Cómo separar el *qué* del *cómo* en un framework de pruebas? La respuesta fue aplicar Arquitectura Hexagonal con `BrowserPort`, `PlaywrightAdapter` y Scenarios que no conocen las herramientas utilizadas.
+
+Si no leíste ese post, te recomiendo empezar ahí:
+
+[Arquitectura Hexagonal en Testing: Separar el QUÉ del CÓMO](https://ignaciops.dev/blog/arquitectura-hexagonal-en-testing-separar-el-que-del-como/)
+
+Febrero llegó con una pregunta distinta: ¿esos mismos principios aplican cuando el SUT no es una interfaz web, sino una API?
+
+La respuesta corta es sí, aunque hay detalles a considerar.
+
+## El nuevo SUT: community-badges
+
+El segundo sistema bajo prueba es `community-badges`, una API desarrollada en FastAPI que gestiona insignias para una comunidad tech. La lógica de negocio es sencilla: los usuarios acumulan asistencias a eventos y el sistema otorga esas insignias de forma automática según umbrales definidos. Solo como dato adicional `community-badges` es un proyecto que se piensa implementar a futuro en DgoTecHub (obviamente un sistema bien definido, no este PoC mínimo generado).&#x20;
+
+| Badge  | Criterio       |
+| ------ | -------------- |
+| Bronce | 1 asistencia   |
+| Plata  | 5 asistencias  |
+| Oro    | 10 asistencias |
+
+Tres dominios interactúan para que esto funcione: usuarios, eventos y badges. Esa interacción entre dominios, aunque básica, convierte este SUT en algo idóneo para practicar API testing usando arquitectura hexagonal.
+
+## La misma arquitectura, una nueva capa
+
+En enero, el Port definía cómo interactuar con un navegador. En febrero, el Port define como interactuar con una API HTTP. El cambio de "superficie" es total, pero el principio es idéntico.
+
+| Mes 1 (UI)           | Mes 2 (API)       |
+| -------------------- | ----------------- |
+| `BrowserPort`        | `ApiPort`         |
+| `PlaywrightAdapter`  | `HttpxApiAdapter` |
+| `NavigationScenario` | `UsersScenario`   |
+
+`ApiPort` define los métodos HTTP básicos sin mencionar HTTPX:
+
+```python
+from abc import ABC, abstractmethod
+from framework.domain.models.api_response import ApiResponse
+
+class ApiPort(ABC):
+
+    @abstractmethod
+    def get(self, endpoint: str) -> ApiResponse:
+        pass
+
+    @abstractmethod
+    def post(self, endpoint: str, body: dict) -> ApiResponse:
+        pass
+
+    @abstractmethod
+    def patch(self, endpoint: str, body: dict) -> ApiResponse:
+        pass
+
+    @abstractmethod
+    def delete(self, endpoint: str) -> ApiResponse:
+        pass
+```
+
+`HttpxApiAdapter` implementa ese contrato usando HTTPX, pero ese detalle de infraestructura los Scenarios nunca necesitan conocerlo. Al limitarse a exponer métodos HTTP genéricos, el Adapter le deja a los Scenarios la responsabilidad de darle nombre y significado a cada operación en términos del negocio.
+
+Los fixtures siguen el mismo patrón que en enero: el tipo anotado es el Port, no el Adapter.
+
+```python
+@pytest.fixture
+def api_adapter() -> ApiPort:
+    return HttpxApiAdapter(base_url=Config.API_BASE_URL)
+```
+
+Esta implementación garantiza que el código que recibe el fixture solo conoce el contrato, no la implementación.&#x20;
+
+## Scenarios: el mismo lenguaje, distinto dominio
+
+`UsersScenario` habla el lenguaje del dominio de usuarios, delegando los detalles HTTP al port:
+
+```python
+class UsersScenario:
+
+    def __init__(self, api_port: ApiPort):
+        self._api = api_port
+        self._users = UsersEndpoints
+
+    def create_user(self, user_data: dict) -> ApiResponse:
+        return self._api.post(self._users.BASE, body=user_data)
+
+    def get_user_badges(self, user_id: int) -> ApiResponse:
+        return self._api.get(self._users.BADGES.format(user_id=user_id))
+```
+
+La ventaja de implementarlo de esta manera es que el Scenario no sabe si la implementación usa HTTPX, Requests u otro cliente HTTP. Solo sabe que puede crear usuarios y consultar sus badges porque el Port le otorga esas capacidades.&#x20;
+
+## El orquestador: BadgeAwardingScenario
+
+Dada la simplicidad del SUT y el poco tiempo que pude dedicar al proyecto, esta es la pieza más interesante del mes. El sistema de badges involucra tres dominios: para otorgar un badge, primero hay que crear un usuario, luego registrar asistencias, y finalmente verificar que el badge fue asignado.
+
+Intentar coordinar eso en cada test sería duplicación de lógica, y parte del roadmap de aprendizaje del año es ir aplicando buenas prácticas en el código.
+
+`BadgeAwardingScenario` es el orquestador: un Scenario de negocio que delega en Scenarios específicos sin conocer el adapter directamente.
+
+```python
+class BadgeAwardingScenario:
+
+    def __init__(
+        self,
+        users_scenario: UsersScenario,
+        attendance_scenario: AttendancesScenario
+    ):
+        self._users = users_scenario
+        self._attendance = attendance_scenario
+
+    def create_user_with_attendances(self, user_data: dict, event_ids: list[int]) -> int:
+        user_response = self._users.create_user(user_data)
+        user_id = user_response.json_body["id"]
+
+        for event_id in event_ids:
+            self._attendance.register_attendance({
+                "user_id": user_id,
+                "event_id": event_id
+            })
+
+        return user_id
+
+    def user_has_badge(self, user_id: int, badge_name: str) -> bool:
+        response = self._users.get_user_badges(user_id)
+        badges = response.json_body["badges"]
+        return any(entry["badge"]["name"] == badge_name for entry in badges)
+```
+
+**Nota importante**: `BadgeAwardingScenario` no recibe `ApiPort` en su constructor. No lo necesita porque confía en que sus "colaboradores" lo implementen correctamente. Así se aplica el principio de responsabilidad única en esta capa de orquestación.
+
+Los tests de awarding quedan limpios y fáciles de entender:&#x20;
+
+```python
+def test_user_receives_bronce_badge_after_attending_1_event(badge_awarding_scenario):
+    user_id = badge_awarding_scenario.create_user_with_attendances(
+        {"username": "test_user_bronze", "discord_id": "1234567889"},
+        event_ids=[1]
+    )
+    assert badge_awarding_scenario.user_has_badge(user_id, "Bronce")
+```
+
+## Los negativos: tan importantes como los happy paths
+
+Una parte significativa de los test cases de febrero son tests negativos. Validar que el sistema *no* hace algo que no debería es tan importante como validar que sí hace lo que debe.
+
+El test de idempotencia ilustra bien este punto. El SUT no debería registrar la misma asistencia dos veces, y eso no debería afectar el conteo de badges:
+
+```python
+def test_idempotency_of_attendance_registration(badge_awarding_scenario):
+    user_id = badge_awarding_scenario.create_user_with_attendances(
+        {"username": "test_user_idempotent", "discord_id": "98765432106784"},
+        event_ids=[1, 2, 3, 4]
+    )
+
+    # Intentar registrar la misma asistencia una vez más
+    attendance = badge_awarding_scenario.register_attendance(user_id, event_id=1)
+
+    assert attendance.status_code == 409
+    assert badge_awarding_scenario.user_has_badge(user_id, "Bronce")
+    assert not badge_awarding_scenario.user_has_badge(user_id, "Plata")
+```
+
+Con 4 asistencias, un usuario tiene el Badge de Bronce. Al intentar duplicar el evento 1, el sistema responde con el código 409 (Conflict. Para entenderlo mejor, acá está explicado con gatos [409 Conflict | HTTP Cats](https://http.cat/status/409)) y el usuario sigue sin tener el badge Plata. El test verifica ambas cosas: el rechazo y la ausencia del efecto colateral.
+
+## El problema del estado: seed data y fixtures de sesión&#x20;
+
+Un reto con el que tuve que lidiar al poco tiempo de trabajar con el SUT fue su estado inicial. El badge de Oro no existía al iniciar el contenedor, y crear un usuario con 10 asistencias sin el badge definido haría que el test fallara por razones ajenas a la lógica que se probaría.
+
+La solución fue de dos partes. Primero, el SUT ejecuta un `seed_data.py` al iniciar el contenedor Docker que crea 2 usuarios, 10 eventos y los badges de Bronce y Plata. Esa data siempre está presente al comenzar las pruebas.
+
+Para el badge de Oro se usa un fixture con scope `session`:
+
+```python
+@pytest.fixture(scope="session")
+def gold_badge_created(session_api_adapter: ApiPort) -> None:
+    scenario = BadgesScenario(session_api_adapter)
+    scenario.create_badge({
+        "name": "Oro",
+        "description": "Asistió al menos a 10 eventos",
+        "criteria": {"type": "attendance_count", "threshold": 10}
+    })
+```
+
+&#x20;El scope `session` garantiza que el badge se crea una sola vez por ejecución de pruebas, no antes de cada test. Los tests de Oro declaran `gold_badge_created` como dependencia explícita, haciendo visible en la firma del test que requieren ese estado previo.
+
+## Lo que quedó pendiente
+
+Febrero tenía dos objetivos adicionales que no se completaron: la integración con TestContainers y la optimización del contenedor Docker para ejecución de pruebas.
+
+TestContainers hubiera permitido levantar la base de datos PostgreSQL y el servicio de la API en contenedores efímeros directamente desde el código de pruebas, eliminando la dependencia de tener el SUT de `community-badges` corriendo manualmente. Sin esa integración, los tests asumen que el SUT ya está disponible en la URL configurada. Funciona, pero es frágil en la implementación de CI.
+
+Eso es algo que completaré en marzo.
+
+## Cerrando febrero
+
+Febrero demostró que los principios de enero no eran específicos de UI testing. `ApiPort`, `HttpxApiAdapter` y los Scenarios de API siguen exactamente la misma lógica que sus equivalentes de navegador. El patrón es escalable.
+
+Lo que cambió es la "superficie": en lugar de simular clicks y navegación, ahora se orquestan llamadas HTTP entre dominios. Pero la separación del *qué* del *cómo* sigue siendo el eje.
+
+En marzo seguiré trabajando con microservicios y se agregará Contract Testing (Pruebas de contratos). La pregunta que servirá de guía es: ¿cómo garantizar que dos servicios que nunca se hablan directamente en pruebas sigan siendo compatibles?
+
+---
+
+Si quieres seguir el progreso o contactarme, encuéntrame en:
+
+* Repositorio: [GitHub](https://github.com/ignaciops/test-architecture-learning)
+* LinkedIn: [ignaciops](https://www.linkedin.com/in/ignaciops/)
+* Twitter/X: [@ignaciopsdev](https://x.com/ignaciopsdev)
+

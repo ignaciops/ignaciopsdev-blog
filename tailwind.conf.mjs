@@ -40,7 +40,7 @@ export default {
 							fontWeight: '700',
 							color: theme('colors.gray.900'),
 						},
-						'code': {
+						':not(pre) > code': {
 							'font-family': theme('fontFamily.mono'),
 							backgroundColor: theme('colors.gray.200'),
 							color: theme('colors.gray.800'),
@@ -63,9 +63,9 @@ export default {
 						'h1, h2, h3, h4': {
 							color: theme('colors.gray.100'),
 						},
-						'code': {
-							// backgroundColor: theme('colors.gray.800'),
-							color: theme('colors.gray.200'),
+						':not(pre) > code': {
+							backgroundColor: theme('colors.gray.800'),
+							color: theme('colors.gray.100'),
 						}
 					},
 				},
