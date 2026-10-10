@@ -17,10 +17,10 @@ const { images } = Astro.props;
 
 <div data-testid="gallery-lightbox" class="gallery-lightbox grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
   {images.map((image, index) => (
-    <div data-testid={`gallery-lightbox-item-${index}`} class="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden cursor-pointer">
+    <div data-testid={`gallery-lightbox-item-${index}`} class="border-2 border-line overflow-hidden cursor-pointer transition-colors hover:border-signal">
       <Image src={image.src} alt={image.alt} class="w-full h-auto" />
       {image.caption && (
-        <p class="p-4 text-sm text-gray-600 dark:text-gray-400">{image.caption}</p>
+        <p class="border-t-2 border-line bg-surface-2 px-3 py-2 font-mono text-xs text-ink-2 leading-relaxed">{image.caption}</p>
       )}
     </div>
   ))}

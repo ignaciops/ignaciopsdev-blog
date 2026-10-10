@@ -31,56 +31,122 @@ const ogImage = frontmatter.ogImage || frontmatter.coverImage || siteConfig.defa
   tags={frontmatter.tags}
   wideContainer={true}
 >
-    <!-- POST HEADER (Title, Meta, Tags) -->
-    <header data-testid="post-header" class="mb-8 not-prose">
-      <h1 data-testid="post-title" class="font-sans font-extrabold text-4xl md:text-5xl lg:text-6xl mb-4 text-gray-900 dark:text-white">
+    <!-- POST HEADER (Volver, Título, Metadata, Resumen, Tags) -->
+    <header data-testid="post-header" class="not-prose">
+      <a href="/blog" class="mono-label inline-flex items-center gap-2 transition-colors hover:text-signal-text">
+        <span aria-hidden="true">←</span> Blog / Publicaciones
+      </a>
+
+      <h1 data-testid="post-title" class="mt-6 font-sans font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.05] tracking-tight max-w-[26ch]">
         {frontmatter.title}
       </h1>
-      <div class="mb-6">
+
+      <!-- Metadata -->
+      <div class="mt-6 mb-7 border-y border-line-soft py-3">
         <PostMeta date={frontmatter.date} readingText={body} dateFormat="long" />
       </div>
+
+      <!-- Resumen / entrada editorial -->
       {(frontmatter.summary || frontmatter.metaDescription) && (
-        <p class="text-lg md:text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+        <p class="text-lg sm:text-xl text-ink-2 leading-relaxed max-w-[58ch]">
           {frontmatter.summary || frontmatter.metaDescription}
         </p>
       )}
-      <TagList tags={frontmatter.tags} size="md" />
+
+      {frontmatter.tags && frontmatter.tags.length > 0 && (
+        <div class="mt-6">
+          <TagList tags={frontmatter.tags} size="md" />
+        </div>
+      )}
     </header>
 
-    <!-- COVER IMAGE (if exists) -->
+    <!-- COVER IMAGE (si existe): evidencia enmarcada, nunca hero a pantalla completa -->
     {frontmatter.coverImage && (
-      <div class="w-screen relative left-1/2 right-1/2 -mx-[50vw] mb-12">
-        <div class="w-full overflow-hidden">
-          <Image
-            data-testid="post-cover-image"
-            src={frontmatter.coverImage}
-            alt={frontmatter.title}
-            width={1200}
-            height={675}
-            class="w-full h-auto object-cover"
-            loading="eager"
-            decoding="async"
-          />
-        </div>
+      <figure class="mt-10 not-prose border-2 border-line">
+        <Image
+          data-testid="post-cover-image"
+          src={frontmatter.coverImage}
+          alt={frontmatter.title}
+          width={1200}
+          height={675}
+          class="w-full h-auto object-cover"
+          loading="eager"
+          decoding="async"
+        />
         {frontmatter.coverImageAttribution && (
-          <div class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800">
-            <p class="text-xs text-gray-600 dark:text-gray-400 text-center" set:html={frontmatter.coverImageAttribution} />
-          </div>
+          <figcaption class="border-t-2 border-line bg-surface-2 px-4 py-2.5 font-mono text-xs text-ink-2" set:html={frontmatter.coverImageAttribution} />
         )}
-      </div>
+      </figure>
     )}
 
-    <div class="relative lg:grid lg:grid-cols-12 lg:gap-12 items-start">
+    <!-- CONTENIDO + ÍNDICE -->
+    <div class="relative mt-12 lg:grid lg:grid-cols-12 lg:gap-0 items-start">
         <!-- ARTICLE CONTENT -->
-        <article data-testid="post-content" class="prose dark:prose-invert max-w-none lg:col-span-8">
-
+        <article
+          data-testid="post-content"
+          class="prose lg:col-span-8 lg:border-r-2 lg:border-line lg:pr-10 xl:pr-14"
+        >
             <slot />
         </article>
 
         <!-- SIDEBAR (TOC) -->
-        <TableOfContents headings={headings} />
+        <div class="hidden lg:block lg:col-span-4 lg:pl-8 xl:pl-10 sticky top-24 self-start">
+          <TableOfContents headings={headings} />
+        </div>
     </div>
 
     <!-- POST NAVIGATION -->
     <PostNavigation prev={prev} next={next} />
+
+    <script>
+      // Envoltorio editorial de los bloques de código: barra con etiqueta de
+      // lenguaje + botón copiar. El contenido sigue siendo un simple <pre>.
+      function initCodeBlocks() {
+        const pres = document.querySelectorAll<HTMLElement>('pre.astro-code, pre[data-language]');
+
+        pres.forEach((pre) => {
+          if (pre.parentElement?.classList.contains('code-wrap')) return;
+
+          const language = pre.getAttribute('data-language') || 'código';
+
+          const wrap = document.createElement('div');
+          wrap.className = 'code-wrap';
+
+          const bar = document.createElement('div');
+          bar.className = 'code-wrap__bar';
+
+          const label = document.createElement('span');
+          label.textContent = language;
+
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className = 'code-copy';
+          copyBtn.textContent = 'copiar';
+          copyBtn.setAttribute('aria-label', `Copiar código ${language}`);
+          copyBtn.addEventListener('click', async () => {
+            const code = pre.querySelector('code')?.textContent ?? pre.textContent ?? '';
+            try {
+              await navigator.clipboard.writeText(code);
+              copyBtn.textContent = 'copiado ✓';
+              copyBtn.dataset.copied = 'true';
+              setTimeout(() => {
+                copyBtn.textContent = 'copiar';
+                delete copyBtn.dataset.copied;
+              }, 2000);
+            } catch {
+              copyBtn.textContent = 'error';
+            }
+          });
+
+          bar.appendChild(label);
+          bar.appendChild(copyBtn);
+
+          pre.parentNode?.insertBefore(wrap, pre);
+          wrap.appendChild(bar);
+          wrap.appendChild(pre);
+        });
+      }
+
+      document.addEventListener('astro:page-load', initCodeBlocks);
+    </script>
 </BaseLayout>

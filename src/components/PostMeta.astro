@@ -14,17 +14,18 @@ interface Props {
 const { date, readingText, variant = 'inline', dateFormat = 'short', textColor = 'default' } = Astro.props;
 
 const containerClass = variant === 'inline'
-  ? 'flex items-center gap-4'
-  : 'space-y-1';
+  ? 'flex flex-wrap items-center gap-3'
+  : 'flex flex-col gap-1.5';
 
 const colorClass = textColor === 'light'
-  ? 'text-gray-200'
-  : 'text-gray-500';
+  ? 'text-ink-2'
+  : 'text-ink-2';
 ---
 
-<div data-testid="post-meta" class={`text-sm font-sans ${containerClass} ${colorClass}`}>
-  <time data-testid="post-date" datetime={date.toISOString()} class="text-xs font-sans font-bold uppercase tracking-wider">
+<div data-testid="post-meta" class={`font-mono text-xs uppercase tracking-[0.1em] leading-none ${containerClass} ${colorClass}`}>
+  <time data-testid="post-date" datetime={date.toISOString()} class="font-medium">
     {formatDate(date, dateFormat)}
   </time>
+  <span class="signal-square" aria-hidden="true"></span>
   <ReadingTime text={readingText} textColor={textColor} />
 </div>

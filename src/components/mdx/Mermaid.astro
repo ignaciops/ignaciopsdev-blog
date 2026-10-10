@@ -9,36 +9,35 @@ const { code, caption } = Astro.props;
 const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
-<div class="my-8">
-  <!-- Contenedor del diagrama con skeleton loader -->
-  <div
-    class="mermaid-container rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 overflow-x-auto"
-  >
-    <!-- Skeleton loader mientras carga -->
-    <div
-      id={`${diagramId}-skeleton`}
-      class="skeleton-loader flex items-center justify-center min-h-[200px] bg-gray-100 dark:bg-gray-800 rounded animate-pulse"
-    >
-      <span class="text-gray-500 dark:text-gray-400 text-sm">Cargando diagrama...</span>
-    </div>
+<!-- Diagrama: componente editorial de primera clase, misma familia que el código -->
+<figure class="my-8 not-prose">
+  <div class="relative">
+    <!-- Contenedor del diagrama con skeleton loader -->
+    <div class="diagram-frame">
+      <div
+        id={`${diagramId}-skeleton`}
+        class="flex items-center justify-center min-h-[200px] bg-surface-2 border border-line-soft"
+      >
+        <span class="mono-label">Cargando diagrama…</span>
+      </div>
 
-    <!-- El diagrama se renderizará aquí -->
-    <div
-      id={diagramId}
-      class="mermaid hidden"
-      data-mermaid-code={code}
-    >
-      {code}
+      <!-- El diagrama se renderizará aquí -->
+      <div
+        id={diagramId}
+        class="mermaid hidden"
+        data-mermaid-code={code}
+      >
+        {code}
+      </div>
     </div>
   </div>
 
-  <!-- Caption opcional -->
-  {caption && (
-    <p class="mt-3 text-sm text-center text-gray-600 dark:text-gray-400 italic">
-      {caption}
-    </p>
+  {caption ? (
+    <figcaption>{caption}</figcaption>
+  ) : (
+    <figcaption class="hidden"></figcaption>
   )}
-</div>
+</figure>
 
 <script>
   // Este script se ejecuta una sola vez cuando se carga la página
@@ -47,9 +46,9 @@ const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
   // Configuración de Mermaid
   mermaid.initialize({
     startOnLoad: false,
-    theme: 'default',
+    theme: 'neutral',
     securityLevel: 'loose',
-    fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+    fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
   });
 
   // Función para renderizar diagramas
@@ -82,12 +81,12 @@ const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
         // Mostrar mensaje de error
         if (skeleton) {
           skeleton.innerHTML = `
-            <div class="text-red-600 dark:text-red-400 text-sm">
-              <p class="font-semibold">Error al renderizar diagrama</p>
+            <div class="text-signal-text text-sm">
+              <p class="font-bold">Error al renderizar diagrama</p>
               <p class="mt-1">${error instanceof Error ? error.message : 'Error desconocido'}</p>
             </div>
           `;
-          skeleton.classList.remove('animate-pulse', 'bg-gray-100', 'dark:bg-gray-800');
+          skeleton.classList.remove('bg-surface-2', 'border', 'border-line-soft');
         }
       }
     }
@@ -100,32 +99,3 @@ const diagramId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
     renderDiagrams();
   }
 </script>
-
-<style>
-  /* Estilos para el contenedor del diagrama */
-  .mermaid-container {
-    transition: all 0.3s ease;
-  }
-
-  /* Asegurar que los SVGs de Mermaid se vean bien */
-  .mermaid svg {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-  }
-
-  /* Animación del skeleton */
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.5;
-    }
-  }
-
-  .animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-</style>

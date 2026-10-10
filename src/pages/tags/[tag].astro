@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import PostCard from '../../components/PostCard.astro';
 
 export async function getStaticPaths() {
@@ -24,21 +25,25 @@ const posts = (await getCollection('posts', ({ data }) =>
 ---
 
 <BaseLayout title={`Posts tagged with "${tag}"`}>
-    <div class="max-w-3xl mx-auto">
-        <h1 data-testid="tag-page-title" class="font-sans font-bold text-4xl mb-8 text-gray-900 dark:text-white">
-            Posts etiquetados con <span class="text-brand-600 dark:text-brand-400">#{tag}</span>
-        </h1>
-        <div data-testid="tag-posts-list" class="space-y-12">
-            {posts.map(post => (
-                <PostCard
-                    title={post.data.title}
-                    slug={post.slug}
-                    date={post.data.date}
-                    summary={post.data.summary || ''}
-                    tags={post.data.tags}
-                    readingText={post.body}
-                />
-            ))}
-        </div>
+    <PageHeader
+      label="Tag"
+      title={`#${tag}`}
+      count={posts.length}
+      countLabel="publicaciones"
+      testId="tag-page-title"
+      description={`Publicaciones etiquetadas con «${tag}».`}
+    />
+
+    <div data-testid="tag-posts-list" class="border-b border-line-soft">
+        {posts.map(post => (
+            <PostCard
+                title={post.data.title}
+                slug={post.slug}
+                date={post.data.date}
+                summary={post.data.summary || ''}
+                tags={post.data.tags}
+                readingText={post.body}
+            />
+        ))}
     </div>
 </BaseLayout>

@@ -4,6 +4,12 @@ export const siteConfig = {
   title: "Ignacio PS",
   description: "Portafolio y Blog de Ingeniería de Software en Pruebas.",
 
+  // Wordmark del header (elemento puramente de presentación)
+  wordmark: {
+    name: "ignaciops",
+    tld: "dev",
+  },
+
   // Author info
   author: {
     name: "Ignacio PS",

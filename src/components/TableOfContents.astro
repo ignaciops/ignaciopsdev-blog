@@ -14,40 +14,87 @@ const { headings } = Astro.props;
 // Filter to only h2 and h3 for cleaner TOC
 const filteredHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 3);
 
-// Pre-calculate indentation classes (Tailwind-safe)
+// Pre-calculated indentation (Tailwind-safe)
 const getIndentClass = (depth: number): string => {
   if (depth === 2) return '';
-  if (depth === 3) return 'pl-4';
+  if (depth === 3) return 'pl-6';
   return 'pl-8';
+};
+
+const getMarker = (depth: number): string => {
+  if (depth === 2) return '';
+  if (depth === 3) return '└ ';
+  return '  ';
 };
 ---
 
-{filteredHeadings.length > 0 && (
-  <aside data-testid="table-of-contents" class="hidden lg:block lg:col-span-4 sticky top-8">
-    <div class="p-4 border-l border-gray-200 dark:border-gray-800">
-      <h2 class="font-sans font-bold text-sm uppercase text-gray-500 mb-4 tracking-wider">
-        En este artículo
-      </h2>
-      <nav data-testid="toc-navigation">
-        <ul class="space-y-2 text-sm">
-          {filteredHeadings.map((heading) => (
-            <li class={getIndentClass(heading.depth)}>
-              <a
-                data-testid={`toc-link-${heading.slug}`}
-                href={`#${heading.slug}`}
-                class={`
-                  block text-gray-600 dark:text-gray-400
-                  hover:text-brand-600 dark:hover:text-brand-400
-                  transition-colors
-                  ${heading.depth === 2 ? 'font-semibold' : ''}
-                `}
-              >
-                {heading.text}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </div>
+{filteredHeadings.length > 1 && (
+  <aside data-testid="table-of-contents">
+    <nav class="border-2 border-line bg-surface-2" data-testid="toc-navigation">
+      <p class="flex items-center justify-between border-b-2 border-line px-4 py-2.5">
+        <span class="mono-label font-bold text-ink">En este artículo</span>
+        <span class="mono-label text-ink-3">{String(filteredHeadings.length).padStart(2, '0')}</span>
+      </p>
+      <ul class="py-1">
+        {filteredHeadings.map((heading) => (
+          <li class={getIndentClass(heading.depth)}>
+            <a
+              data-testid={`toc-link-${heading.slug}`}
+              href={`#${heading.slug}`}
+              data-toc-slug={heading.slug}
+              class:list={[
+                'toc-link',
+                { 'font-mono text-[0.7rem] uppercase tracking-[0.06em]': heading.depth === 3 }
+              ]}
+            >
+              <span aria-hidden="true" class="font-mono text-ink-3">{getMarker(heading.depth)}</span>
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   </aside>
 )}
+
+<script>
+  // Scrollspy discreto: marca la sección visible. Funcional, no decorativo.
+  function initTocSpy() {
+    const article = document.querySelector('[data-testid="post-content"]');
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-toc-slug]'));
+    if (!article || links.length === 0) return;
+
+    const headings = links
+      .map(link => document.getElementById(link.dataset.tocSlug || ''))
+      .filter((h): h is HTMLElement => h !== null);
+    if (headings.length === 0) return;
+
+    let activeSlug: string | null = null;
+
+    const setActive = (slug: string) => {
+      if (activeSlug === slug) return;
+      activeSlug = slug;
+      links.forEach(link => {
+        link.classList.toggle('is-active', link.dataset.tocSlug === slug);
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Preferir la primera entrada visible
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length > 0) {
+          setActive(visible[0].target.id);
+        }
+      },
+      { rootMargin: '-15% 0px -70% 0px', threshold: 0 }
+    );
+
+    headings.forEach(h => observer.observe(h));
+    setActive(headings[0].id);
+  }
+
+  document.addEventListener('astro:page-load', initTocSpy);
+</script>
