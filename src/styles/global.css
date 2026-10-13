@@ -1,15 +1,15 @@
-// ===========================================================================
-// CAPA VISUAL / RENDERER
-// ---------------------------------------------------------------------------
-// El contenido (MDX + Keystatic) y los componentes semánticos no conocen esta
-// estética. Todo lo brutalista vive aquí: tokens, tipografía y reglas de
-// render. Cambiar el rediseño futuro = cambiar este archivo.
-//
-//   Contenido → Componentes semánticos → Renderer (este archivo)
-//
-// Tipografías: Space Grotesk (UI/display) · Inter (lectura) · JetBrains Mono
-// Paleta:      ink (negro frío) · surface (off-white) · signal (rojo)
-// ===========================================================================
+/* ===========================================================================
+   CAPA VISUAL / RENDERER
+   ---------------------------------------------------------------------------
+   El contenido (MDX + Keystatic) y los componentes semánticos no conocen esta
+   estética. Todo lo brutalista vive aquí: tokens, tipografía y reglas de
+   render. Cambiar el rediseño futuro = cambiar este archivo.
+
+     Contenido → Componentes semánticos → Renderer (este archivo)
+
+   Tipografías: Space Grotesk (UI/display) · Inter (lectura) · JetBrains Mono
+   Paleta:      ink (negro frío) · surface (off-white) · signal (rojo)
+   =========================================================================== */
 
 @config "../../tailwind.conf.mjs";
 @import "tailwindcss";
