@@ -5,6 +5,12 @@ import Footer from '../components/Footer.astro';
 import { siteConfig } from '../config/site';
 import '../styles/global.css';
 
+// Preload de las tres caras críticas (latin): llegan antes del primer paint
+// y minimizan el periodo invisible de font-display: block.
+import spaceGroteskWoff2 from '../../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2';
+import interWoff2 from '../../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2';
+import jetbrainsMonoWoff2 from '../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2';
+
 interface Props {
   title?: string;
   description?: string;
@@ -37,6 +43,11 @@ const ogImageUrl = ogImage.startsWith('http') ? ogImage : new URL(ogImage, Astro
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="alternate" type="application/rss+xml" title={`${siteConfig.title} - RSS Feed`} href="/rss.xml" />
+
+    <!-- Preload de fuentes críticas -->
+    <link rel="preload" href={spaceGroteskWoff2} as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href={interWoff2} as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href={jetbrainsMonoWoff2} as="font" type="font/woff2" crossorigin>
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <title>{title}</title>

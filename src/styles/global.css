@@ -13,14 +13,100 @@
 
 @config "../../tailwind.conf.mjs";
 @import "tailwindcss";
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/400-italic.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource-variable/space-grotesk";
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/500.css";
-@import "@fontsource/jetbrains-mono/700.css";
+/* ===========================================================================
+   TIPOGRAFÍAS
+   ---------------------------------------------------------------------------
+   Mismos archivos woff2 de Fontsource, pero con font-display: block en lugar
+   del swap por defecto: con swap, el texto pinta primero con la fuente del
+   sistema y se "encoge" al llegar la webfont (reflow visible en cada carga).
+   Con block el navegador espera (breve, mismo origen + preload) y pinta
+   una sola vez con los métricos correctos. El subset latin cubre el
+   español; latin-ext se incluye en display y cuerpo.
+   =========================================================================== */
+
+/* Space Grotesk Variable — display / UI (eje de peso 300–700) */
+@font-face {
+  font-family: 'Space Grotesk Variable';
+  font-style: normal;
+  font-display: block;
+  font-weight: 300 700;
+  src: url(../../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2) format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Space Grotesk Variable';
+  font-style: normal;
+  font-display: block;
+  font-weight: 300 700;
+  src: url(../../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-ext-wght-normal.woff2) format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* Inter — lectura (400/500/600 + itálica) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-display: block;
+  font-weight: 400;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-400-italic.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: block;
+  font-weight: 500;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: block;
+  font-weight: 600;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* JetBrains Mono — código, etiquetas, metadatos */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src: url(../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: block;
+  font-weight: 500;
+  src: url(../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: block;
+  font-weight: 700;
+  src: url(../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 
 /* ===========================================================================
    TOKENS
@@ -134,8 +220,17 @@ body {
   transform: translateY(0);
 }
 
-/* Transiciones entre páginas: fondo coherente con el token de superficie */
+/* Transiciones entre páginas: se deshabilitan las animaciones de snapshots
+   (incluido el redimensionado del grupo raíz) para que la navegación sea un
+   swap instantáneo, sin escalados percibibles. Fondo coherente con el token. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 ::view-transition-group(root) {
+  animation: none;
   background-color: var(--surface);
 }
 
@@ -338,10 +433,16 @@ body {
 }
 
 /* Envoltorio editorial de código (barra de lenguaje + botón copiar).
-   El DOM lo construye el renderer vía script; el contenido solo trae <pre>. */
+   El DOM lo construye el renderer vía script; el contenido solo trae <pre>.
+   Los márgenes compensan los del <pre> de prose para que la inserción de la
+   barra no desplace el contenido (shift ≈ 0 al cargar). */
 .code-wrap {
   position: relative;
-  margin: 2rem 0;
+  margin: 0;
+}
+
+.code-wrap pre {
+  margin-top: 0;
 }
 
 .code-wrap__bar {
