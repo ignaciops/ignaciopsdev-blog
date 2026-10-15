@@ -6,7 +6,6 @@ import PostCard from '../components/PostCard.astro';
 import FeaturedPost from '../components/FeaturedPost.astro';
 import { siteConfig } from '../config/site';
 import { getAllPosts, getFeaturedPosts } from '../utils/collections';
-import heroBackgroundImage from '../assets/images/home/heroBackgroundImage.png';
 
 const home = await getEntry('home', 'index');
 if (!home) {
@@ -17,19 +16,27 @@ const featured = await getFeaturedPosts();
 const latestPosts = (await getAllPosts())
   .filter(post => !post.data.featured)
   .slice(0, siteConfig.recentPostsCount);
+
+// El contenido puede traer botones; si no hay, ofrecemos acceso directo al blog
+const buttons = home.data.heroButtons && home.data.heroButtons.length > 0
+  ? home.data.heroButtons
+  : [{ text: 'Leer el blog →', link: '/blog', variant: 'primary' as const }];
 ---
 
-<BaseLayout title={siteConfig.title} floatingHeader={true}>
+<BaseLayout title={siteConfig.title}>
     <Hero
         slot="hero"
         title={home.data.heroTitle}
         description={home.data.heroDescription}
-        buttons={home.data.heroButtons}
-        backgroundImage={heroBackgroundImage}
+        buttons={buttons}
     />
 
     {featured.length > 0 && (
-      <section data-testid="featured-posts-section" class="py-8 mb-8">
+      <section data-testid="featured-posts-section" class="mb-14">
+        <p class="mono-label flex items-center gap-3 mb-5">
+          <span class="signal-square" aria-hidden="true"></span>
+          Selección
+        </p>
         <div class="grid grid-cols-1 gap-8">
           {featured.slice(0, 1).map(post => (
             <FeaturedPost
@@ -47,25 +54,28 @@ const latestPosts = (await getAllPosts())
     )}
 
     <!-- LATEST POSTS SECTION -->
-    <section data-testid="recent-posts-section" class="py-4">
-        <div class="max-w-3xl mx-auto">
-            <div class="flex justify-between items-end mb-8">
-                <h2 class="font-sans font-bold text-3xl text-gray-900 dark:text-white">Recientes</h2>
-                <a href="/blog" class="font-sans text-brand-600 dark:text-brand-400 hover:underline">Ver todo →</a>
-            </div>
+    <section data-testid="recent-posts-section">
+        <div class="flex items-end justify-between border-b-2 border-line pb-3 mb-2 gap-4">
+            <h2 class="mono-label font-bold text-ink flex items-center gap-3">
+              <span class="signal-square" aria-hidden="true"></span>
+              Recientes
+            </h2>
+            <a href="/blog" class="mono-label flex items-center gap-1.5 transition-colors hover:text-signal-text">
+              Ver todo <span aria-hidden="true">→</span>
+            </a>
+        </div>
 
-            <div data-testid="recent-posts-list" class="space-y-12">
-                {latestPosts.map((post) => (
-                    <PostCard
-                        title={post.data.title}
-                        slug={post.slug}
-                        date={post.data.date}
-                        summary={post.data.summary || ''}
-                        tags={post.data.tags}
-                        readingText={post.body}
-                    />
-                ))}
-            </div>
+        <div data-testid="recent-posts-list">
+            {latestPosts.map((post) => (
+                <PostCard
+                    title={post.data.title}
+                    slug={post.slug}
+                    date={post.data.date}
+                    summary={post.data.summary || ''}
+                    tags={post.data.tags}
+                    readingText={post.body}
+                />
+            ))}
         </div>
     </section>
 

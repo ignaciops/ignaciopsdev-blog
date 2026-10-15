@@ -23,7 +23,8 @@ export default defineConfig({
 
   markdown: {
     shikiConfig: {
-      theme: 'one-dark-pro',
+      // Bloque oscuro sólido en ambos temas (el renderer lo enmarca con borde sólido)
+      theme: 'github-dark',
       wrap: false
     }
   },

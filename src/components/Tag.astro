@@ -8,19 +8,19 @@ interface Props {
 const { tag, size = 'sm', variant = 'interactive' } = Astro.props;
 
 const sizeClasses = {
-  sm: 'px-2 py-1 text-xs',
-  md: 'px-3 py-1 text-xs'
+  sm: 'px-2 py-0.5 text-[0.65rem]',
+  md: 'px-2.5 py-1 text-xs'
 };
 
 const variantClasses = variant === 'interactive'
-  ? 'hover:bg-gray-300 dark:hover:bg-gray-600'
+  ? 'hover:bg-ink hover:text-surface transition-colors'
   : '';
 ---
 
 <a
   data-testid={`tag-${tag}`}
   href={`/tags/${tag}`}
-  class={`bg-gray-200 dark:bg-gray-700 rounded-full font-semibold text-gray-700 dark:text-gray-300 ${sizeClasses[size]} ${variantClasses}`}
+  class={`inline-block border border-line text-ink-2 font-mono uppercase tracking-[0.08em] leading-none ${sizeClasses[size]} ${variantClasses}`}
 >
   #{tag}
 </a>

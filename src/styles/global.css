@@ -1,20 +1,228 @@
+/* ===========================================================================
+   CAPA VISUAL / RENDERER
+   ---------------------------------------------------------------------------
+   El contenido (MDX + Keystatic) y los componentes semánticos no conocen esta
+   estética. Todo lo brutalista vive aquí: tokens, tipografía y reglas de
+   render. Cambiar el rediseño futuro = cambiar este archivo.
+
+     Contenido → Componentes semánticos → Renderer (este archivo)
+
+   Tipografías: Space Grotesk (UI/display) · Inter (lectura) · JetBrains Mono
+   Paleta:      ink (negro frío) · surface (off-white) · signal (rojo)
+   =========================================================================== */
 
 @config "../../tailwind.conf.mjs";
 @import "tailwindcss";
+/* ===========================================================================
+   TIPOGRAFÍAS
+   ---------------------------------------------------------------------------
+   Mismos archivos woff2 de Fontsource, pero con font-display: block en lugar
+   del swap por defecto: con swap, el texto pinta primero con la fuente del
+   sistema y se "encoge" al llegar la webfont (reflow visible en cada carga).
+   Con block el navegador espera (breve, mismo origen + preload) y pinta
+   una sola vez con los métricos correctos. El subset latin cubre el
+   español; latin-ext se incluye en display y cuerpo.
+   =========================================================================== */
 
-:root {
-  --bg-light: #f8fafc;
-  --bg-dark: #0c1425;
+/* Space Grotesk Variable — display / UI (eje de peso 300–700) */
+@font-face {
+  font-family: 'Space Grotesk Variable';
+  font-style: normal;
+  font-display: block;
+  font-weight: 300 700;
+  src: url(../../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-wght-normal.woff2) format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
+@font-face {
+  font-family: 'Space Grotesk Variable';
+  font-style: normal;
+  font-display: block;
+  font-weight: 300 700;
+  src: url(../../node_modules/@fontsource-variable/space-grotesk/files/space-grotesk-latin-ext-wght-normal.woff2) format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
+/* Inter — lectura (400/500/600 + itálica) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-display: block;
+  font-weight: 400;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-400-italic.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: block;
+  font-weight: 500;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-display: block;
+  font-weight: 600;
+  src: url(../../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* JetBrains Mono — código, etiquetas, metadatos */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src: url(../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: block;
+  font-weight: 500;
+  src: url(../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: block;
+  font-weight: 700;
+  src: url(../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* ===========================================================================
+   TOKENS
+   =========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* Tipografías (referenciadas por la capa prose y por utilidades) */
+  --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-reading: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Superficies (off-white, nunca blanco puro) */
+  --surface: #f4f3ef;
+  --surface-2: #e8e6df;
+  --surface-3: #dbd8ce;
+
+  /* Tinta (negro frío) */
+  --ink: #0b0e12;
+  --ink-2: #4a525a;
+  --ink-3: #656d76; /* AA 4.7:1 sobre surface */
+
+  /* Estructura */
+  --line: #0b0e12;
+  --line-soft: #cdc9be;
+
+  /* Señal / acento */
+  --signal: #d4241a;        /* formas, barras, rellenos de hover */
+  --signal-text: #b31d14;   /* texto pequeño sobre superficies (AA 6:1) */
+  --on-signal: #f7f5f0;     /* texto sobre bloques rojos */
+
+  /* Sombra sólida (brutal) */
+  --hard-shadow: #0b0e12;
+
+  /* Retícula sutil del masthead */
+  --grid-line: color-mix(in srgb, var(--ink) 9%, transparent);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --surface: #0b0e12;
+  --surface-2: #12161c;
+  --surface-3: #1b212a;
+
+  --ink: #e9e7e1;
+  --ink-2: #a4acb5;
+  --ink-3: #8a939d; /* AA 5.8:1 sobre surface */
+
+  --line: #d8d6cf;
+  --line-soft: #2a313b;
+
+  --signal: #ff4838;
+  --signal-text: #ff6a5e;
+  --on-signal: #0b0e12;
+
+  --hard-shadow: #39424d;
+
+  --grid-line: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+/* ===========================================================================
+   BASE
+   =========================================================================== */
+
 html {
-    overflow-y: scroll;
+  overflow-y: scroll;
+  scroll-padding-top: 6rem; /* header sticky + respiro */
 }
 
 body {
-    overflow-x: hidden;
+  overflow-x: hidden;
+  background-color: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-reading);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+/* Selección: bloque rojo sólido */
+::selection {
+  background-color: var(--signal);
+  color: var(--on-signal);
+}
+
+/* Foco visible: señal roja, siempre presente y accesible */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Saltar al contenido */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  transform: translateY(-110%);
+  background-color: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.75rem 1.25rem;
+  border: 2px solid var(--line);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Transiciones entre páginas: se deshabilitan las animaciones de snapshots
+   (incluido el redimensionado del grupo raíz) para que la navegación sea un
+   swap instantáneo, sin escalados percibibles. Fondo coherente con el token. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -22,13 +230,392 @@ body {
 }
 
 ::view-transition-group(root) {
-  background-color: var(--bg-light);
-}
-
-.dark ::view-transition-group(root) {
-  background-color: var(--bg-dark);
+  animation: none;
+  background-color: var(--surface);
 }
 
 .content-switching * {
   transition: none !important;
+}
+
+/* Movimiento reducido: la información nunca depende de animaciones */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ===========================================================================
+   PRIMITIVAS BRUTALISTAS (usadas por los componentes semánticos)
+   Vive en @layer components para que las utilidades de Tailwind puedan
+   sobrescribirlas en cada componente (utilities > components).
+   =========================================================================== */
+
+/* Sombra sólida desplazada (@utility para soportar variantes como hover:) */
+@utility hard-shadow {
+  box-shadow: 6px 6px 0 0 var(--hard-shadow);
+}
+
+@utility hard-shadow-sm {
+  box-shadow: 4px 4px 0 0 var(--hard-shadow);
+}
+
+@layer components {
+  /* Etiqueta técnica en monospace — metadatos, secciones, identidad */
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-2);
+  }
+
+  /* Cuadrado sólido de señal */
+  .signal-square {
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    background-color: var(--signal);
+    flex-shrink: 0;
+  }
+
+  /* Botones */
+  .brutal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid var(--line);
+    background-color: var(--ink);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.65rem 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease,
+      transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .brutal-btn:hover {
+    background-color: var(--signal);
+    color: var(--on-signal);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--hard-shadow);
+  }
+
+  .brutal-btn--ghost {
+    background-color: transparent;
+    color: var(--ink);
+  }
+
+  .brutal-btn--ghost:hover {
+    background-color: var(--ink);
+    color: var(--surface);
+  }
+
+  /* Retícula editorial del masthead (solo zonas de identidad, nunca de lectura) */
+  .masthead-grid {
+    background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 90%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.85), transparent 90%);
+    pointer-events: none;
+  }
+
+  /* Índice de artículo: enlaces del TOC */
+  .toc-link {
+    display: block;
+    border-left: 3px solid transparent;
+    padding: 0.4rem 0.85rem;
+    font-family: var(--font-reading);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+    transition: color 0.12s ease, border-color 0.12s ease,
+      background-color 0.12s ease;
+  }
+
+  .toc-link:hover {
+    color: var(--ink);
+    background-color: var(--surface-3);
+  }
+
+  .toc-link.is-active {
+    border-left-color: var(--signal);
+    background-color: var(--surface-3);
+    color: var(--ink);
+    font-weight: 600;
+  }
+}
+
+/* ===========================================================================
+   PROSE — EXTRAS DEL RENDERER SOBRE EL ARTÍCULO
+   (la base vive en tailwind.conf.mjs; aquí solo refinamiento y contadores)
+   =========================================================================== */
+
+.prose {
+  counter-reset: section figure;
+}
+
+/* Numeración editorial de secciones: "01 /" en rojo sobre cada h2 */
+.prose h2 {
+  counter-increment: section;
+}
+
+.prose h2::before {
+  content: counter(section, decimal-leading-zero) " /";
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--signal-text);
+  margin-bottom: 0.6rem;
+}
+
+/* Enlaces dentro del artículo: subrayado rojo → bloque sólido al hover */
+.prose a {
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.prose a:hover {
+  background-color: var(--signal);
+  color: var(--on-signal);
+  text-decoration-color: transparent;
+}
+
+/* Imágenes del artículo: evidencia enmarcada, no decoración */
+.prose img {
+  border: 2px solid var(--line);
+  display: block;
+}
+
+/* Numeración de figuras */
+.prose figure {
+  counter-increment: figure;
+}
+
+.prose figure > figcaption::before {
+  content: "FIG. " counter(figure, decimal-leading-zero) " — ";
+  font-weight: 700;
+  color: var(--signal-text);
+}
+
+/* Ritmo de lectura en desktop */
+@media (min-width: 768px) {
+  .prose {
+    font-size: 1.125rem;
+  }
+}
+
+/* Los bloques de código nunca rompen el layout */
+.prose pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Envoltorio editorial de código (barra de lenguaje + botón copiar).
+   El DOM lo construye el renderer vía script; el contenido solo trae <pre>.
+   Los márgenes compensan los del <pre> de prose para que la inserción de la
+   barra no desplace el contenido (shift ≈ 0 al cargar). */
+.code-wrap {
+  position: relative;
+  margin: 0;
+}
+
+.code-wrap pre {
+  margin-top: 0;
+}
+
+.code-wrap__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 2px solid var(--line);
+  border-bottom: none;
+  background-color: var(--surface-2);
+  padding: 0.3rem 0.6rem 0.3rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+}
+
+.code-copy {
+  border: 2px solid var(--line);
+  background-color: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.code-copy:hover {
+  background-color: var(--ink);
+  color: var(--surface);
+}
+
+.code-copy[data-copied="true"] {
+  background-color: var(--signal);
+  border-color: var(--signal);
+  color: var(--on-signal);
+}
+
+/* ===========================================================================
+   CALLOUTS — SEMÁNTICA ANTES QUE APARIENCIA
+   El tipo (note/info/tip/warning/danger) define el color de señal; la
+   superficie y el texto siguen siendo los tokens de lectura.
+   =========================================================================== */
+
+.callout {
+  border: 2px solid var(--line);
+  border-left: 6px solid var(--callout-accent, var(--ink));
+  background-color: color-mix(in srgb, var(--callout-accent, var(--ink)) 6%, var(--surface));
+  padding: 1rem 1.25rem;
+  margin: 2rem 0;
+}
+
+.callout__label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--callout-accent, var(--ink));
+  margin-bottom: 0.5rem;
+}
+
+.callout__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid currentColor;
+  font-size: 0.7rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.callout__body > :first-child {
+  margin-top: 0;
+}
+
+.callout__body > :last-child {
+  margin-bottom: 0;
+}
+
+.callout__body {
+  font-family: var(--font-reading);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.callout__body a {
+  color: var(--signal-text);
+  text-decoration: underline;
+  text-decoration-color: var(--signal);
+  text-underline-offset: 3px;
+}
+
+.callout__body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background-color: var(--surface-3);
+  border: 1px solid var(--line-soft);
+  padding: 0.1em 0.35em;
+}
+
+/* Semántica por tipo */
+.callout--note {
+  --callout-accent: var(--ink-2);
+}
+
+.callout--info {
+  --callout-accent: #1e5ed6;
+}
+
+.callout--tip {
+  --callout-accent: #137a43;
+}
+
+.callout--warning {
+  --callout-accent: #9a5b00;
+}
+
+.callout--danger {
+  --callout-accent: #c11f14;
+}
+
+.dark .callout--note {
+  --callout-accent: #b9c0c8;
+}
+
+.dark .callout--info {
+  --callout-accent: #6fa8ff;
+}
+
+.dark .callout--tip {
+  --callout-accent: #4ade80;
+}
+
+.dark .callout--warning {
+  --callout-accent: #f2b03c;
+}
+
+.dark .callout--danger {
+  --callout-accent: #ff6a5e;
+}
+
+/* ===========================================================================
+   DIAGRAMAS (Mermaid)
+   Viven como los bloques de código: superficie diferenciada, borde sólido.
+   =========================================================================== */
+
+.diagram-frame {
+  border: 2px solid var(--line);
+  background-color: #ffffff;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.dark .diagram-frame {
+  background-color: #f4f3ef; /* los diagramas claros se conservan como evidencia */
+}
+
+.diagram-frame svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }

@@ -1,0 +1,40 @@
+---
+// Cabecera de sección compartida: etiqueta técnica + título + descripción.
+// Componente semántico; su apariencia vive en las clases del renderer.
+interface Props {
+  label: string;
+  title: string;
+  description?: string;
+  count?: number;
+  countLabel?: string;
+  testId?: string;
+}
+
+const { label, title, description, count, countLabel = 'elementos', testId = 'page-title' } = Astro.props;
+---
+
+<header class="border-b-2 border-line pb-8 mb-10">
+  <p class="mono-label flex items-center gap-3">
+    <span class="signal-square" aria-hidden="true"></span>
+    {label}
+    {count !== undefined && (
+      <span class="text-ink-3">/ {String(count).padStart(2, '0')} {countLabel}</span>
+    )}
+  </p>
+
+  <div class="mt-4 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+    <h1 data-testid={testId} class="font-sans font-bold uppercase tracking-tight leading-[0.95] text-[clamp(2rem,6vw,3.25rem)]">
+      <slot name="title">{title}</slot>
+    </h1>
+
+    <slot name="actions" />
+  </div>
+
+  {description && (
+    <p class="mt-4 text-ink-2 leading-relaxed max-w-[62ch]">
+      {description}
+    </p>
+  )}
+
+  <slot />
+</header>

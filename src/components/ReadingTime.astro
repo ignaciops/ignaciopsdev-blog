@@ -20,9 +20,9 @@ function calculateReadingTime(text: string): number {
 
 const readingTime = calculateReadingTime(text);
 
-const colorClass = textColor === 'light' ? 'text-gray-200' : 'text-gray-500';
+const colorClass = textColor === 'light' ? 'text-ink-2' : 'text-ink-2';
 ---
 
-<span data-testid="reading-time" class={`text-xs font-sans uppercase tracking-wider ${colorClass}`}>
+<span data-testid="reading-time" class={`font-mono text-xs uppercase tracking-[0.1em] ${colorClass}`}>
     {readingTime} min de lectura
 </span>

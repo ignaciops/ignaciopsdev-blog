@@ -7,15 +7,21 @@ export interface Props {
 const { id, title = "YouTube Video" } = Astro.props;
 ---
 
-<div class="my-8 rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800">
+<!-- Vídeo incrustado: marco sólido, sin sombras ni esquinas redondeadas -->
+<div class="my-8 not-prose border-2 border-line">
+  <div class="flex items-center justify-between border-b-2 border-line bg-surface-2 px-3 py-1.5">
+    <span class="mono-label">Vídeo · YouTube</span>
+    <span class="mono-label text-ink-3 truncate max-w-[60%]" title={title}>{title}</span>
+  </div>
   <!-- Wrapper para mantener aspect ratio 16:9 -->
-  <div class="relative w-full aspect-video bg-gray-100 dark:bg-gray-900">
+  <div class="relative w-full aspect-video bg-ink">
     <iframe
       src={`https://www.youtube-nocookie.com/embed/${id}`}
       title={title}
       frameborder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowfullscreen
+      loading="lazy"
       class="absolute top-0 left-0 w-full h-full"
     ></iframe>
   </div>

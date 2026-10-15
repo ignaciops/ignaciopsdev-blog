@@ -17,18 +17,18 @@ const { title, slug, date, summary, tags, readingText, variant = 'default' } = A
 // Variant-specific styling
 const variants = {
   default: {
-    container: 'group',
+    container: 'group relative border-t border-line-soft py-8 first:border-t-0',
     titleSize: 'text-2xl',
     showReadMore: true
   },
   compact: {
-    container: 'group',
-    titleSize: 'text-2xl',
+    container: 'group relative border-t border-line-soft py-6 first:border-t-0',
+    titleSize: 'text-xl',
     showReadMore: false
   },
   featured: {
-    container: 'group border-l-4 border-brand-600 dark:border-brand-400 pl-4',
-    titleSize: 'text-3xl',
+    container: 'group relative border-t border-line-soft py-8 first:border-t-0 sm:pl-6 sm:border-l-4 sm:border-signal',
+    titleSize: 'text-2xl',
     showReadMore: true
   }
 };
@@ -37,25 +37,42 @@ const config = variants[variant];
 ---
 
 <article data-testid="post-card" class={config.container}>
-  <a data-testid="post-card-link" href={`/blog/${slug}`} class="block">
-    <PostMeta date={date} readingText={readingText} dateFormat="short" />
-
-    <h3 data-testid="post-card-title" class={`${config.titleSize} font-sans font-bold text-gray-900 dark:text-gray-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors mb-2 mt-1`}>
-      {title}
-    </h3>
-
-    <div data-testid="post-card-summary" class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400 leading-relaxed">
-      {summary}
+  <div class="grid gap-x-8 gap-y-2 sm:grid-cols-[7rem_1fr]">
+    <!-- Rail de metadatos (estilo índice editorial) -->
+    <div class="pt-1.5">
+      <PostMeta date={date} readingText={readingText} dateFormat="short" variant="stacked" />
     </div>
-  </a>
 
-  <div class="mt-4">
-    <TagList tags={tags} />
+    <!-- Contenido -->
+    <div>
+      <h3 data-testid="post-card-title" class={`${config.titleSize} font-sans font-bold leading-tight tracking-tight`}>
+        <a
+          data-testid="post-card-link"
+          href={`/blog/${slug}`}
+          class="transition-colors hover:text-signal-text after:absolute after:inset-0 after:content-['']"
+        >
+          {title}
+        </a>
+      </h3>
+
+      {summary && (
+        <p data-testid="post-card-summary" class="mt-2.5 text-[0.9375rem] leading-relaxed text-ink-2 max-w-[62ch]">
+          {summary}
+        </p>
+      )}
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="relative z-10">
+          <TagList tags={tags} />
+        </div>
+
+        {config.showReadMore && (
+          <span data-testid="post-card-read-more" class="mono-label relative z-10 flex items-center gap-1.5 text-ink transition-colors group-hover:text-signal-text">
+            Leer
+            <span class="transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true">→</span>
+          </span>
+        )}
+      </div>
+    </div>
   </div>
-
-  {config.showReadMore && (
-    <a data-testid="post-card-read-more" href={`/blog/${slug}`} class="inline-block mt-2 text-sm font-sans font-medium text-brand-600 dark:text-brand-400 underline decoration-transparent hover:decoration-current transition-all">
-      Leer artículo →
-    </a>
-  )}
 </article>

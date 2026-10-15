@@ -7,45 +7,27 @@ export interface Props {
 
 const { type = 'note', title, content } = Astro.props;
 
+// Semántica antes que apariencia: el tipo define el mensaje; el renderer
+// (global.css) traduce ese significado a color y forma.
 const config = {
   note: {
-    icon: '📝',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-500',
-    textColor: 'text-blue-900',
-    titleColor: 'text-blue-800',
+    mark: '■',
     defaultTitle: 'Nota'
   },
   tip: {
-    icon: '💡',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-500',
-    textColor: 'text-green-900',
-    titleColor: 'text-green-800',
+    mark: '✚',
     defaultTitle: 'Consejo'
   },
   warning: {
-    icon: '⚠️',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-500',
-    textColor: 'text-orange-900',
-    titleColor: 'text-orange-800',
+    mark: '▲',
     defaultTitle: 'Advertencia'
   },
   danger: {
-    icon: '❗',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-500',
-    textColor: 'text-red-900',
-    titleColor: 'text-red-800',
+    mark: '✕',
     defaultTitle: 'Peligro'
   },
   info: {
-    icon: 'ℹ️',
-    bgColor: 'bg-cyan-50',
-    borderColor: 'border-cyan-500',
-    textColor: 'text-cyan-900',
-    titleColor: 'text-cyan-800',
+    mark: '◆',
     defaultTitle: 'Información'
   }
 };
@@ -53,24 +35,12 @@ const config = {
 const currentConfig = config[type];
 ---
 
-<div class={`${currentConfig.bgColor} ${currentConfig.borderColor} ${currentConfig.textColor} border-l-4 p-4 my-6 rounded-r-lg`}>
-  <div class="flex items-center gap-3">
-    <span class="text-2xl flex-shrink-0 self-start mt-1" aria-hidden="true">{currentConfig.icon}</span>
-    <div class="flex-1">
-      {title && <p class={`font-bold ${currentConfig.titleColor} mb-2 text-base`}>{title}</p>}
-      <div class="prose prose-base max-w-none callout-content">
-        {content ? <p set:html={content.replace(/\n/g, '<br>')} /> : <slot />}
-      </div>
-    </div>
+<aside class={`callout callout--${type}`} role="note">
+  <p class="callout__label">
+    <span class="callout__mark" aria-hidden="true">{currentConfig.mark}</span>
+    {title || currentConfig.defaultTitle}
+  </p>
+  <div class="callout__body">
+    {content ? <p set:html={content.replace(/\n/g, '<br>')} /> : <slot />}
   </div>
-</div>
-
-<style>
-  .callout-content :global(p:last-child) {
-    margin-bottom: 0;
-  }
-
-  .callout-content :global(p:first-child) {
-    margin-top: 0;
-  }
-</style>
+</aside>
